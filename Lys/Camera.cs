@@ -1,8 +1,9 @@
 using OpenTK.Mathematics;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Lys;
 
-    public class Camera(Vector3 position, float aspectRatio)
+    public class Camera(Vector3 position, float aspectRatio, KeyboardState keyboardState, MouseState mouseState)
     {
         private Vector3 _front = -Vector3.UnitZ;
 
@@ -15,6 +16,10 @@ namespace Lys;
         private float _yaw = -MathHelper.PiOver2;
 
         private float _fov = MathHelper.PiOver2;
+        
+        private bool _firstMove = true;
+        
+        private Vector2 _lastPos;
 
         public Vector3 Position { get; set; } = position;
 
@@ -77,5 +82,56 @@ namespace Lys;
 
             _right = Vector3.Normalize(Vector3.Cross(_front, Vector3.UnitY));
             _up = Vector3.Normalize(Vector3.Cross(_right, _front));
+        }
+
+        public void Update(double time)
+        {
+            const float cameraSpeed = 1.5f;
+            const float sensitivity = 0.2f;
+
+            if (keyboardState.IsKeyDown(Keys.W))
+            {
+                Position += Front * cameraSpeed * (float)time;
+            }
+
+            if (keyboardState.IsKeyDown(Keys.S))
+            {
+                Position -= Front * cameraSpeed * (float)time;
+            }
+
+            if (keyboardState.IsKeyDown(Keys.A))
+            {
+                Position -= Right * cameraSpeed * (float)time;
+            }
+
+            if (keyboardState.IsKeyDown(Keys.D))
+            {
+                Position += Right * cameraSpeed * (float)time;
+            }
+
+            if (keyboardState.IsKeyDown(Keys.Space))
+            {
+                Position += Up * cameraSpeed * (float)time;
+            }
+
+            if (keyboardState.IsKeyDown(Keys.LeftShift))
+            {
+                Position -= Up * cameraSpeed * (float)time;
+            }
+
+            if (_firstMove)
+            {
+                _lastPos = new Vector2(mouseState.X, mouseState.Y);
+                _firstMove = false;
+            }
+            else
+            {
+                var deltaX = mouseState.X - _lastPos.X;
+                var deltaY = mouseState.Y - _lastPos.Y;
+                _lastPos = new Vector2(mouseState.X, mouseState.Y);
+
+                Yaw += deltaX * sensitivity;
+                Pitch -= deltaY * sensitivity;
+            }
         }
     }

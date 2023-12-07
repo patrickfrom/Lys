@@ -51,4 +51,10 @@ public class Shader
         GL.UseProgram(Handle);
         GL.UniformMatrix4(_uniformLocations[location], true, ref data);
     }
+
+    public void SetVector3(string location, Vector3 data)
+    {
+        GL.UseProgram(Handle);
+        GL.Uniform3(_uniformLocations[location], ref data);
+    }
 }
