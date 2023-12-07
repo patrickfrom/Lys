@@ -10,6 +10,7 @@
     <ItemGroup>
       <PackageReference Include="OpenTK.Graphics" Version="4.8.2" />
       <PackageReference Include="OpenTK.Windowing.Desktop" Version="4.8.2" />
+      <PackageReference Include="StbImageSharp" Version="2.27.13" />
     </ItemGroup>
 
     <ItemGroup>
@@ -25,6 +26,16 @@
       <None Update="Assets\Shaders\lightCube.vert">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="Assets\Textures\container2.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Assets\Textures\container2_specular.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Assets\Textures\" />
     </ItemGroup>
 
 </Project>

@@ -27,35 +27,36 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
     private float[] _vertices =
     {
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-        0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-        0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-        -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,  1.0f, 1.0f,
+        -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
 
-        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-        0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-        0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+        0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
 
-        -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
-        -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
 
-        0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+        0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
 
-        -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
-        0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
-        0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
-        -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
 
-        0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        
     };
 
     private int[] _indices =
@@ -81,7 +82,10 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
     private Vector3 _lightColor = new(1.0f, 1.0f, 1.0f);
     private Vector3 _lightPos = new(2, 3, 2);
-    
+
+    private Texture _container;
+    private Texture _containerSpecular;
+
     protected override void OnLoad()
     {
         GlDebugger.Init();
@@ -102,22 +106,28 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
             BufferUsageHint.StaticDraw);
 
         GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
 
         GL.EnableVertexAttribArray(1);
-        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
-
+        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float)); 
+        
+        GL.EnableVertexAttribArray(2);
+        GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 6 * sizeof(float));
+        
         _lightVao = GL.GenVertexArray();
         GL.BindVertexArray(_lightVao);
-
+        
         GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
-
+    
         GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
 
         _lightingShader = new Shader("Assets/Shaders/colors.vert", "Assets/Shaders/colors.frag");
         _lightCubeShader = new Shader("Assets/Shaders/lightCube.vert", "Assets/Shaders/lightCube.frag");
+
+        _container = new Texture("Assets/Textures/container2.png");
+        _containerSpecular = new Texture("Assets/Textures/container2_specular.png");
 
         _camera = new Camera(Vector3.UnitZ * 3, ClientSize.X / (float)ClientSize.Y, KeyboardState, MouseState);
 
@@ -135,35 +145,36 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     {
         if (!IsFocused)
             return;
-        
+
         _time += 4.0 * e.Time;
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
         GL.BindVertexArray(_vao);
         _lightingShader.Use();
-        
+
         var model = Matrix4.Identity;
         _lightingShader.SetMatrix4("model", model);
         _lightingShader.SetMatrix4("view", _camera.GetViewMatrix());
         _lightingShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
-        
+
         _lightingShader.SetVector3("viewPos", _camera.Position);
         _lightingShader.SetMatrix3("normalInverse", new Matrix3(model.Inverted()));
         
-        _lightingShader.SetVector3("material.ambient", new Vector3(0.24725f, 0.1995f, 0.0745f));
-        _lightingShader.SetVector3("material.diffuse", new Vector3(0.75164f, 0.60648f, 0.22648f));
-        _lightingShader.SetVector3("material.specular", new Vector3(0.628281f, 0.555802f, 0.366065f));
-        _lightingShader.SetFloat("material.shininess", 32.0f);
+        _lightingShader.SetVector3("material.specular", new Vector3(1.0f, 1.0f, 1.0f));
+        _lightingShader.SetFloat("material.shininess", 8.0f);
+        _lightingShader.SetInt("material.diffuse", 0);
+        GL.ActiveTexture(TextureUnit.Texture0);
+        GL.BindTexture(TextureTarget.Texture2D, _container.Id);
 
-        var diffuseColor = _lightColor * new Vector3(1.0f);
-        var ambientColor = diffuseColor * new Vector3(1.0f);
-        
+        var diffuseColor = _lightColor * new Vector3(0.5f);
+        var ambientColor = diffuseColor * new Vector3(0.2f);
+
         _lightingShader.SetVector3("light.position", _lightPos);
         _lightingShader.SetVector3("light.ambient", ambientColor);
         _lightingShader.SetVector3("light.diffuse", diffuseColor);
         _lightingShader.SetVector3("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
-        
+
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
         GL.BindVertexArray(_lightVao);

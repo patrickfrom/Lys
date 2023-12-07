@@ -69,4 +69,10 @@ public class Shader
         GL.UseProgram(Handle);
         GL.Uniform3(_uniformLocations[location], ref data);
     }
+
+    public void SetInt(string location, int amount)
+    {
+        GL.UseProgram(Handle);
+        GL.Uniform1(_uniformLocations[location], amount);
+    }
 }
