@@ -28,16 +28,51 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
     private float[] _vertices =
     {
-        -0.5f, 0.5f,
-        -0.5f, -0.5f,
-        0.5f, -0.5f,
-        0.5f, 0.5f,
+        -0.5f, -0.5f, -0.5f, 0.2f, 1.0f, 1.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.2f, 1.0f, 1.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  0.2f, 1.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f, 0.2f, 1.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, 0.2f, 1.0f, 1.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  0.2f, 1.0f, 1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  0.2f, 1.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f, 0.2f, 1.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f, 0.2f, 1.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 0.2f, 1.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, 0.2f, 1.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f, 0.2f, 1.0f, 1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  0.2f, 1.0f, 1.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  0.2f, 1.0f, 1.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.2f, 1.0f, 1.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  0.2f, 1.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 0.2f, 1.0f, 1.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.2f, 1.0f, 1.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  0.2f, 1.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, 0.2f, 1.0f, 1.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  0.2f, 1.0f, 1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  0.2f, 1.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f, 0.2f, 1.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f, 0.2f, 1.0f, 1.0f, 1.0f,
     };
 
     private int[] _indices =
     {
-        0, 1, 3,
-        3, 2, 1
+        0, 3, 1,
+        3, 2, 1,
+        
+        4, 5, 7,
+        7, 5, 6,
+        
+        8, 9, 11,
+        11, 9, 10,
+        
+        12, 15, 13,
+        15, 14, 13,
+        
+        16, 17, 19,
+        19, 17, 18,
+        
+        20, 23, 21,
+        23, 22, 21,
     };
 
     protected override void OnLoad()
@@ -60,7 +95,10 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
             BufferUsageHint.StaticDraw);
 
         GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, 2 * sizeof(float), 0);
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 7 * sizeof(float), 0);
+        
+        GL.EnableVertexAttribArray(1);
+        GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, 7 * sizeof(float), 3 * sizeof(float));
 
         _lightingShader = new Shader("Assets/Shaders/colors.vert", "Assets/Shaders/colors.frag");
         _lightingShader.Use();
@@ -68,6 +106,14 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _camera = new Camera(Vector3.UnitZ * 3, ClientSize.X / (float)ClientSize.Y);
 
         CursorState = CursorState.Grabbed;
+        
+        
+        GL.Enable(EnableCap.Blend);
+        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+        
+        GL.Enable(EnableCap.DepthTest);
+        GL.Enable(EnableCap.CullFace);
+        GL.CullFace(CullFaceMode.Back); 
     }
 
     protected override void OnRenderFrame(FrameEventArgs e)
