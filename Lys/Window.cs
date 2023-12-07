@@ -28,30 +28,30 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     private float[] _vertices =
     {
         -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,
+        0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
         0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
         -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-        
+
         -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
         0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
         0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
         -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-        
+
         -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
         -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
         -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
         -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
-        
+
         0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
         0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
         0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
         0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
-        
+
         -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
         0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
         0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
         -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
-        
+
         0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
         0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
         -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
@@ -100,13 +100,13 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         GL.EnableVertexAttribArray(0);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
-        
+
         GL.EnableVertexAttribArray(1);
         GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
 
         _lightVao = GL.GenVertexArray();
         GL.BindVertexArray(_lightVao);
-        
+
         GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
 
@@ -129,15 +129,19 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     }
 
     private Vector3 _lightPos = new(2, 3, 2);
+
     protected override void OnRenderFrame(FrameEventArgs e)
     {
+        if (!IsFocused)
+            return;
+        
         _time += 4.0 * e.Time;
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
         GL.BindVertexArray(_vao);
         _lightingShader.Use();
-
+        
         var model = Matrix4.Identity;
         _lightingShader.SetMatrix4("model", model);
         _lightingShader.SetMatrix4("view", _camera.GetViewMatrix());
@@ -145,12 +149,15 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _lightingShader.SetVector3("objectColor", new Vector3(1.0f, 0.1f, 1.0f));
         _lightingShader.SetVector3("lightColor", new Vector3(1.0f, 1.0f, 1.0f));
         _lightingShader.SetVector3("lightPos", _lightPos);
+        _lightingShader.SetVector3("viewPos", _camera.Position);
+        _lightingShader.SetMatrix3("normalInverse", new Matrix3(model.Inverted()));
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
         GL.BindVertexArray(_lightVao);
         _lightCubeShader.Use();
 
         var model2 = Matrix4.CreateTranslation(_lightPos);
+        model2 *= Matrix4.CreateScale(0.5f);
         _lightCubeShader.SetMatrix4("model", model2);
         _lightCubeShader.SetMatrix4("view", _camera.GetViewMatrix());
         _lightCubeShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
@@ -162,10 +169,18 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
     protected override void OnUpdateFrame(FrameEventArgs e)
     {
-        _lightPos.Y = (float)MathHelper.Cos(2 + _time);
         if (!IsFocused)
         {
             return;
+        }
+
+        // _lightPos.Y = (float)MathHelper.Cos(_time * 0.15f) * 5;
+        // _lightPos.X = (float)MathHelper.Sin(_time * 0.15f) * 5;
+        // _lightPos.Z = (float)MathHelper.Sin(_time * 0.15f) * 5;
+
+        if (KeyboardState.IsKeyPressed(Keys.F11))
+        {
+            WindowState = WindowState != WindowState.Fullscreen ? WindowState.Fullscreen : WindowState.Normal;
         }
 
         if (KeyboardState.IsKeyDown(Keys.Escape))
