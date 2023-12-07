@@ -56,7 +56,6 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
         -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
         -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        
     };
 
     private int[] _indices =
@@ -85,6 +84,8 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
     private Texture _container;
     private Texture _containerSpecular;
+    private Texture _containerSpecularColor;
+    private Texture _pinkColorSpecular;
 
     protected override void OnLoad()
     {
@@ -128,6 +129,8 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         _container = new Texture("Assets/Textures/container2.png");
         _containerSpecular = new Texture("Assets/Textures/container2_specular.png");
+        _containerSpecularColor = new Texture("Assets/Textures/lighting_maps_specular_color.png");
+        _pinkColorSpecular = new Texture("Assets/Textures/pink.png");
 
         _camera = new Camera(Vector3.UnitZ * 3, ClientSize.X / (float)ClientSize.Y, KeyboardState, MouseState);
 
@@ -161,11 +164,15 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _lightingShader.SetVector3("viewPos", _camera.Position);
         _lightingShader.SetMatrix3("normalInverse", new Matrix3(model.Inverted()));
         
-        _lightingShader.SetVector3("material.specular", new Vector3(1.0f, 1.0f, 1.0f));
         _lightingShader.SetFloat("material.shininess", 8.0f);
         _lightingShader.SetInt("material.diffuse", 0);
+        _lightingShader.SetInt("material.specular", 1);
         GL.ActiveTexture(TextureUnit.Texture0);
         GL.BindTexture(TextureTarget.Texture2D, _container.Id);
+        
+        GL.ActiveTexture(TextureUnit.Texture1);
+        GL.BindTexture(TextureTarget.Texture2D, _containerSpecular.Id);
+
 
         var diffuseColor = _lightColor * new Vector3(0.5f);
         var ambientColor = diffuseColor * new Vector3(0.2f);
@@ -223,5 +230,9 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
     protected override void OnUnload()
     {
+        GL.DeleteTexture(_container.Id);
+        GL.DeleteTexture(_containerSpecular.Id);
+        GL.DeleteTexture(_containerSpecularColor.Id);
+        GL.DeleteTexture(_pinkColorSpecular.Id);
     }
 }
