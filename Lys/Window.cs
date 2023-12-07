@@ -27,30 +27,35 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
     private float[] _vertices =
     {
-        -0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
-        0.5f, 0.5f, -0.5f,
-        -0.5f, 0.5f, -0.5f,
-        -0.5f, -0.5f, 0.5f,
-        0.5f, -0.5f, 0.5f,
-        0.5f, 0.5f, 0.5f,
-        -0.5f, 0.5f, 0.5f,
-        -0.5f, 0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, 0.5f,
-        -0.5f, 0.5f, 0.5f,
-        0.5f, 0.5f, 0.5f,
-        0.5f, 0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, 0.5f,
-        -0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, 0.5f,
-        -0.5f, -0.5f, 0.5f,
-        0.5f, 0.5f, -0.5f,
-        0.5f, 0.5f, 0.5f,
-        -0.5f, 0.5f, 0.5f,
-        -0.5f, 0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,
+        0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+        -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+        
+        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        
+        -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
+        
+        0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
+        
+        -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
+        0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
+        -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
+        
+        0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
     };
 
     private int[] _indices =
@@ -94,23 +99,19 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
             BufferUsageHint.StaticDraw);
 
         GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
+        
+        GL.EnableVertexAttribArray(1);
+        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
 
         _lightVao = GL.GenVertexArray();
         GL.BindVertexArray(_lightVao);
-
-        var lightVbo = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ArrayBuffer, lightVbo);
-        GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices,
-            BufferUsageHint.StaticDraw);
-
-        var lightEbo = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, lightEbo);
-        GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(int), _indices,
-            BufferUsageHint.StaticDraw);
+        
+        GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
 
         GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
 
         _lightingShader = new Shader("Assets/Shaders/colors.vert", "Assets/Shaders/colors.frag");
         _lightCubeShader = new Shader("Assets/Shaders/lightCube.vert", "Assets/Shaders/lightCube.frag");
@@ -127,6 +128,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         GL.CullFace(CullFaceMode.Back);
     }
 
+    private Vector3 _lightPos = new(2, 3, 2);
     protected override void OnRenderFrame(FrameEventArgs e)
     {
         _time += 4.0 * e.Time;
@@ -140,14 +142,15 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _lightingShader.SetMatrix4("model", model);
         _lightingShader.SetMatrix4("view", _camera.GetViewMatrix());
         _lightingShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
-        _lightingShader.SetVector3("objectColor", new Vector3(1.0f, 0.0f, 0.0f));
+        _lightingShader.SetVector3("objectColor", new Vector3(1.0f, 0.1f, 1.0f));
         _lightingShader.SetVector3("lightColor", new Vector3(1.0f, 1.0f, 1.0f));
+        _lightingShader.SetVector3("lightPos", _lightPos);
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
         GL.BindVertexArray(_lightVao);
         _lightCubeShader.Use();
 
-        var model2 = Matrix4.CreateTranslation(new Vector3(2, 3, 2));
+        var model2 = Matrix4.CreateTranslation(_lightPos);
         _lightCubeShader.SetMatrix4("model", model2);
         _lightCubeShader.SetMatrix4("view", _camera.GetViewMatrix());
         _lightCubeShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
@@ -159,6 +162,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
     protected override void OnUpdateFrame(FrameEventArgs e)
     {
+        _lightPos.Y = (float)MathHelper.Cos(2 + _time);
         if (!IsFocused)
         {
             return;
