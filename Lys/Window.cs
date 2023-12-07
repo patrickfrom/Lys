@@ -79,6 +79,9 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         23, 22, 21,
     };
 
+    private Vector3 _lightColor = new(1.0f, 1.0f, 1.0f);
+    private Vector3 _lightPos = new(2, 3, 2);
+    
     protected override void OnLoad()
     {
         GlDebugger.Init();
@@ -128,8 +131,6 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         GL.CullFace(CullFaceMode.Back);
     }
 
-    private Vector3 _lightPos = new(2, 3, 2);
-
     protected override void OnRenderFrame(FrameEventArgs e)
     {
         if (!IsFocused)
@@ -146,11 +147,23 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _lightingShader.SetMatrix4("model", model);
         _lightingShader.SetMatrix4("view", _camera.GetViewMatrix());
         _lightingShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
-        _lightingShader.SetVector3("objectColor", new Vector3(1.0f, 0.1f, 1.0f));
-        _lightingShader.SetVector3("lightColor", new Vector3(1.0f, 1.0f, 1.0f));
-        _lightingShader.SetVector3("lightPos", _lightPos);
+        
         _lightingShader.SetVector3("viewPos", _camera.Position);
         _lightingShader.SetMatrix3("normalInverse", new Matrix3(model.Inverted()));
+        
+        _lightingShader.SetVector3("material.ambient", new Vector3(0.24725f, 0.1995f, 0.0745f));
+        _lightingShader.SetVector3("material.diffuse", new Vector3(0.75164f, 0.60648f, 0.22648f));
+        _lightingShader.SetVector3("material.specular", new Vector3(0.628281f, 0.555802f, 0.366065f));
+        _lightingShader.SetFloat("material.shininess", 32.0f);
+
+        var diffuseColor = _lightColor * new Vector3(1.0f);
+        var ambientColor = diffuseColor * new Vector3(1.0f);
+        
+        _lightingShader.SetVector3("light.position", _lightPos);
+        _lightingShader.SetVector3("light.ambient", ambientColor);
+        _lightingShader.SetVector3("light.diffuse", diffuseColor);
+        _lightingShader.SetVector3("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
+        
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
         GL.BindVertexArray(_lightVao);
@@ -161,6 +174,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _lightCubeShader.SetMatrix4("model", model2);
         _lightCubeShader.SetMatrix4("view", _camera.GetViewMatrix());
         _lightCubeShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
+        _lightCubeShader.SetVector3("color", _lightColor);
 
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 

@@ -46,6 +46,18 @@ public class Shader
         GL.UseProgram(Handle);
     }
 
+    public void SetFloat(string location, float amount)
+    {
+        GL.UseProgram(Handle);
+        GL.Uniform1(_uniformLocations[location], amount);
+    }
+    
+    public void SetMatrix3(string location, Matrix3 data)
+    {
+        GL.UseProgram(Handle);
+        GL.UniformMatrix3(_uniformLocations[location], true, ref data);
+    }
+    
     public void SetMatrix4(string location, Matrix4 data)
     {
         GL.UseProgram(Handle);
@@ -56,11 +68,5 @@ public class Shader
     {
         GL.UseProgram(Handle);
         GL.Uniform3(_uniformLocations[location], ref data);
-    }
-
-    public void SetMatrix3(string location, Matrix3 data)
-    {
-        GL.UseProgram(Handle);
-        GL.UniformMatrix3(_uniformLocations[location], true, ref data);
     }
 }
