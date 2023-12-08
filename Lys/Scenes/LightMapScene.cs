@@ -119,8 +119,8 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         GL.EnableVertexAttribArray(0);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
 
-        _lightingShader = new Shader("Assets/Shaders/colors.vert", "Assets/Shaders/colors.frag");
-        _lightCubeShader = new Shader("Assets/Shaders/lightCube.vert", "Assets/Shaders/lightCube.frag");
+        _lightingShader = new Shader("Assets/Shaders/LightMapScene/colors.vert", "Assets/Shaders/LightMapScene/colors.frag");
+        _lightCubeShader = new Shader("Assets/Shaders/LightMapScene/lightCube.vert", "Assets/Shaders/LightMapScene/lightCube.frag");
 
         _container = new Texture("Assets/Textures/container2.png");
         _containerSpecular = new Texture("Assets/Textures/container2_specular.png");
@@ -155,9 +155,8 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         
         DrawCube(new Vector3(0, 0, 0));
-
+        
         GL.BindVertexArray(_lightVao);
-        _lightCubeShader.Use();
 
         var model2 = Matrix4.CreateTranslation(_lightPos);
         model2 *= Matrix4.CreateScale(0.5f);
@@ -215,7 +214,6 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
     private void DrawCube(Vector3 position)
     {
         GL.BindVertexArray(_vao);
-        _lightingShader.Use();
 
         var model = Matrix4.CreateTranslation(position);
         _lightingShader.SetMatrix4("model", model);
@@ -230,7 +228,7 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
 
         var diffuseColor = _lightColor * new Vector3(0.5f);
         var ambientColor = diffuseColor * new Vector3(0.2f);
-
+        
         _lightingShader.SetVector3("light.position", _lightPos);
         _lightingShader.SetVector3("light.ambient", ambientColor);
         _lightingShader.SetVector3("light.diffuse", diffuseColor);
@@ -241,7 +239,5 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         _emissionMap.Use(2);
         
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
-
-        GL.BindVertexArray(0);
     }
 }
