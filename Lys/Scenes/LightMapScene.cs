@@ -81,6 +81,8 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
     private Texture _containerSpecularColor;
     private Texture _pinkColorSpecular;
     private Texture _emissionMap;
+    private int _ebo;
+    private int _vbo;
 
     public override void OnLoad()
     {
@@ -91,13 +93,13 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         _vao = GL.GenVertexArray();
         GL.BindVertexArray(_vao);
 
-        var vbo = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+        _vbo = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
         GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices,
             BufferUsageHint.StaticDraw);
 
-        var ebo = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
+        _ebo = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
         GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(int), _indices,
             BufferUsageHint.StaticDraw);
 
@@ -113,8 +115,8 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         _lightVao = GL.GenVertexArray();
         GL.BindVertexArray(_lightVao);
 
-        GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
 
         GL.EnableVertexAttribArray(0);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
@@ -128,6 +130,7 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         _pinkColorSpecular = new Texture("Assets/Textures/pink.png");
         _emissionMap = new Texture("Assets/Textures/matrix.jpg");
 
+        _lightingShader.Use();
         _lightingShader.SetInt("material.diffuse", 0);
         _lightingShader.SetInt("material.specular", 1);
         _lightingShader.SetInt("material.emission", 2);
@@ -156,8 +159,8 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         
         DrawCube(new Vector3(0, 0, 0));
         
+        _lightCubeShader.Use();
         GL.BindVertexArray(_lightVao);
-
         var model2 = Matrix4.CreateTranslation(_lightPos);
         model2 *= Matrix4.CreateScale(0.5f);
         _lightCubeShader.SetMatrix4("model", model2);
@@ -204,6 +207,14 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
 
     public override void OnUnload()
     {
+        GL.DeleteVertexArray(_vao);
+        
+        GL.DeleteBuffer(_vbo);
+        GL.DeleteBuffer(_ebo);
+
+        _lightingShader.Dispose();
+        _lightCubeShader.Dispose();
+        
         GL.DeleteTexture(_container.Id);
         GL.DeleteTexture(_containerSpecular.Id);
         GL.DeleteTexture(_containerSpecularColor.Id);
@@ -213,8 +224,8 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
 
     private void DrawCube(Vector3 position)
     {
+        _lightingShader.Use();
         GL.BindVertexArray(_vao);
-
         var model = Matrix4.CreateTranslation(position);
         _lightingShader.SetMatrix4("model", model);
         _lightingShader.SetMatrix4("view", _camera.GetViewMatrix());
