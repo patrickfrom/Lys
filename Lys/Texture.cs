@@ -20,10 +20,24 @@ public class Texture
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
 
-        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, image.Width, image.Height, 0,
-            PixelFormat.Rgba, PixelType.UnsignedByte, image.Data);
+        var format = image.Comp switch
+        {
+            ColorComponents.Default => (int)PixelFormat.Red,
+            ColorComponents.RedGreenBlue => (int)PixelFormat.Rgb,
+            ColorComponents.RedGreenBlueAlpha => (int)PixelFormat.Rgba,
+            _ => 0
+        };
+        
+        GL.TexImage2D(TextureTarget.Texture2D, 0, (PixelInternalFormat)format, image.Width, image.Height, 0,
+            (PixelFormat)format, PixelType.UnsignedByte, image.Data);
         GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
         
         GL.BindTexture(TextureTarget.Texture2D, 0);
+    }
+
+    public void Use(int textureUnit = 0)
+    {
+        GL.ActiveTexture(TextureUnit.Texture0+textureUnit);
+        GL.BindTexture(TextureTarget.Texture2D, Id);
     }
 }

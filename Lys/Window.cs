@@ -29,30 +29,30 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     {
         -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
         0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
-        0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,  1.0f, 1.0f,
+        0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
         -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
 
-        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
         0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
         0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
         -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
 
-        -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+        -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
         -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
         -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
         -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
 
-        0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
         0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
         0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
         0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
 
-        -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
         0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
         0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
         -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
 
-        0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+        0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
         0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
         -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
         -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
@@ -86,6 +86,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     private Texture _containerSpecular;
     private Texture _containerSpecularColor;
     private Texture _pinkColorSpecular;
+    private Texture _emissionMap;
 
     protected override void OnLoad()
     {
@@ -110,17 +111,17 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
 
         GL.EnableVertexAttribArray(1);
-        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float)); 
-        
+        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float));
+
         GL.EnableVertexAttribArray(2);
         GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 6 * sizeof(float));
-        
+
         _lightVao = GL.GenVertexArray();
         GL.BindVertexArray(_lightVao);
-        
+
         GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
-    
+
         GL.EnableVertexAttribArray(0);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
 
@@ -131,7 +132,11 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _containerSpecular = new Texture("Assets/Textures/container2_specular.png");
         _containerSpecularColor = new Texture("Assets/Textures/lighting_maps_specular_color.png");
         _pinkColorSpecular = new Texture("Assets/Textures/pink.png");
-
+        _emissionMap = new Texture("Assets/Textures/matrix.jpg");
+        _lightingShader.SetInt("material.diffuse", 0);
+        _lightingShader.SetInt("material.specular", 1);
+        _lightingShader.SetInt("material.emission", 2);
+        
         _camera = new Camera(Vector3.UnitZ * 3, ClientSize.X / (float)ClientSize.Y, KeyboardState, MouseState);
 
         CursorState = CursorState.Grabbed;
@@ -163,17 +168,9 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         _lightingShader.SetVector3("viewPos", _camera.Position);
         _lightingShader.SetMatrix3("normalInverse", new Matrix3(model.Inverted()));
-        
+
         _lightingShader.SetFloat("material.shininess", 8.0f);
-        _lightingShader.SetInt("material.diffuse", 0);
-        _lightingShader.SetInt("material.specular", 1);
-        GL.ActiveTexture(TextureUnit.Texture0);
-        GL.BindTexture(TextureTarget.Texture2D, _container.Id);
         
-        GL.ActiveTexture(TextureUnit.Texture1);
-        GL.BindTexture(TextureTarget.Texture2D, _containerSpecular.Id);
-
-
         var diffuseColor = _lightColor * new Vector3(0.5f);
         var ambientColor = diffuseColor * new Vector3(0.2f);
 
@@ -182,6 +179,11 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _lightingShader.SetVector3("light.diffuse", diffuseColor);
         _lightingShader.SetVector3("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
 
+        // textures
+        _container.Use();
+        _containerSpecular.Use(1);
+        _emissionMap.Use(2);
+        
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
         GL.BindVertexArray(_lightVao);
@@ -195,7 +197,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _lightCubeShader.SetVector3("color", _lightColor);
 
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
-
+        
         SwapBuffers();
     }
 
@@ -220,7 +222,15 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
             Close();
         }
 
-        _camera.Update(e.Time);
+        if (KeyboardState.IsKeyPressed(Keys.F))
+        {
+            CursorState = CursorState == CursorState.Grabbed ? CursorState.Normal : CursorState.Grabbed;
+        }
+        
+        if (CursorState == CursorState.Grabbed)
+        {
+            _camera.Update(e.Time);
+        }
     }
 
     protected override void OnResize(ResizeEventArgs e)
