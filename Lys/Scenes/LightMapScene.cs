@@ -85,8 +85,8 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
     public override void OnLoad()
     {
         base.OnLoad();
-        
-        GL.ClearColor(Color.CornflowerBlue);
+
+        GL.ClearColor(Color.Navy);
 
         _vao = GL.GenVertexArray();
         GL.BindVertexArray(_vao);
@@ -153,34 +153,8 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         _time += 4.0 * e.Time;
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-        GL.BindVertexArray(_vao);
-        _lightingShader.Use();
-
-        var model = Matrix4.Identity;
-        _lightingShader.SetMatrix4("model", model);
-        _lightingShader.SetMatrix4("view", _camera.GetViewMatrix());
-        _lightingShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
-
-        _lightingShader.SetVector3("viewPos", _camera.Position);
-        _lightingShader.SetMatrix3("normalInverse", new Matrix3(model.Inverted()));
-
-        _lightingShader.SetFloat("material.shininess", 8.0f);
-
-        var diffuseColor = _lightColor * new Vector3(0.5f);
-        var ambientColor = diffuseColor * new Vector3(0.2f);
-
-        _lightingShader.SetVector3("light.position", _lightPos);
-        _lightingShader.SetVector3("light.ambient", ambientColor);
-        _lightingShader.SetVector3("light.diffuse", diffuseColor);
-        _lightingShader.SetVector3("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
-
-        // textures
-        _container.Use();
-        _containerSpecular.Use(1);
-        _emissionMap.Use(2);
-
-        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+        
+        DrawCube(new Vector3(0, 0, 0));
 
         GL.BindVertexArray(_lightVao);
         _lightCubeShader.Use();
@@ -208,7 +182,9 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
 
         if (window.KeyboardState.IsKeyPressed(Keys.F11))
         {
-            window.WindowState = window.WindowState != WindowState.Fullscreen ? WindowState.Fullscreen : WindowState.Normal;
+            window.WindowState = window.WindowState != WindowState.Fullscreen
+                ? WindowState.Fullscreen
+                : WindowState.Normal;
         }
 
         if (window.KeyboardState.IsKeyDown(Keys.Escape))
@@ -226,7 +202,7 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
             _camera.Update(e.Time);
         }
     }
-    
+
     public override void OnUnload()
     {
         GL.DeleteTexture(_container.Id);
@@ -234,5 +210,38 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         GL.DeleteTexture(_containerSpecularColor.Id);
         GL.DeleteTexture(_pinkColorSpecular.Id);
         GL.DeleteTexture(_emissionMap.Id);
+    }
+
+    private void DrawCube(Vector3 position)
+    {
+        GL.BindVertexArray(_vao);
+        _lightingShader.Use();
+
+        var model = Matrix4.CreateTranslation(position);
+        _lightingShader.SetMatrix4("model", model);
+        _lightingShader.SetMatrix4("view", _camera.GetViewMatrix());
+        _lightingShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
+
+        _lightingShader.SetVector3("viewPos", _camera.Position);
+        _lightingShader.SetMatrix3("normalInverse", new Matrix3(model.Inverted()));
+
+        _lightingShader.SetFloat("material.shininess", 8.0f);
+        _lightingShader.SetFloat("material.emissionBrightness", (float)MathHelper.Cos(0.7f * _time) + 2.0f);
+
+        var diffuseColor = _lightColor * new Vector3(0.5f);
+        var ambientColor = diffuseColor * new Vector3(0.2f);
+
+        _lightingShader.SetVector3("light.position", _lightPos);
+        _lightingShader.SetVector3("light.ambient", ambientColor);
+        _lightingShader.SetVector3("light.diffuse", diffuseColor);
+        _lightingShader.SetVector3("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
+        
+        _container.Use();
+        _containerSpecular.Use(1);
+        _emissionMap.Use(2);
+        
+        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+
+        GL.BindVertexArray(0);
     }
 }
