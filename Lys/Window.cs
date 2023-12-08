@@ -21,7 +21,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     {
         GlDebugger.Init();
 
-        _currentScene = new LightMapScene(this, Title);
+        _currentScene = new LightMapScene(this, "Light Maps");
         _currentScene.OnLoad();
     }
 

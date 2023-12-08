@@ -84,6 +84,8 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
 
     public override void OnLoad()
     {
+        base.OnLoad();
+        
         GL.ClearColor(Color.CornflowerBlue);
 
         _vao = GL.GenVertexArray();
