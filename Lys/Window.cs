@@ -22,6 +22,8 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         GlDebugger.Init();
 
         _currentScene = new LightMapScene(this, "Light Maps");
+        //_currentScene = new LightCasterScene(this, "Light Caster");
+        
         _currentScene.OnLoad();
     }
 
