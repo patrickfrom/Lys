@@ -20,8 +20,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Assets\Skybox\"/>
         <Folder Include="Assets\Textures\"/>
     </ItemGroup>
-
 </Project>

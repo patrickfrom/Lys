@@ -40,7 +40,7 @@ void main() {
     vec3 specular = light.specular * spec * texture(material.specular, texCoords).rgb;
 
     vec3 emission = texture(material.emission, texCoords).rgb * material.emissionBrightness * floor(vec3(1.0) - texture(material.specular,texCoords).rgb);
-
+    
     vec3 result = ambient + diffuse + specular + emission;
     FragColor = vec4(result, 1.0);
 }

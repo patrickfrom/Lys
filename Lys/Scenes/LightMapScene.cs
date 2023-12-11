@@ -1,4 +1,5 @@
 using System.Drawing;
+using Lys.Audio;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -118,6 +119,7 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
     private Texture _containerSpecularColor;
     private Texture _pinkColorSpecular;
     private Texture _emissionMap;
+    private Texture _normalMap;
     
     private int _ebo;
     private int _vbo;
@@ -127,7 +129,7 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
     public override void OnLoad()
     {
         base.OnLoad();
-
+        
         GL.ClearColor(Color.Navy);
 
         _vao = GL.GenVertexArray();
@@ -187,8 +189,9 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         _lightCubeShader = new Shader("Assets/Shaders/LightMapScene/lightCube.vert", "Assets/Shaders/LightMapScene/lightCube.frag");
         _skyboxShader = new Shader("Assets/Shaders/skybox.vert", "Assets/Shaders/skybox.frag");
 
-        _container = new Texture("Assets/Textures/container2.png");
-        _containerSpecular = new Texture("Assets/Textures/container2_specular.png");
+        _container = new Texture("Assets/Textures/rusted-panels_albedo.png");
+        _containerSpecular = new Texture("Assets/Textures/rusted-panels_metallic.png");
+        _normalMap = new Texture("Assets/Textures/rusted-panels_normal-ogl.png");
         _containerSpecularColor = new Texture("Assets/Textures/lighting_maps_specular_color.png");
         _pinkColorSpecular = new Texture("Assets/Textures/pink.png");
         _emissionMap = new Texture("Assets/Textures/matrix.jpg");
