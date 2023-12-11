@@ -75,39 +75,6 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         20, 23, 21,
         23, 22, 21,
     };
-    
-    private float[] _skyboxVertices =
-    {
-        -1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-        1.0f, 1.0f, -1.0f,
-        -1.0f, 1.0f, -1.0f,
-
-        -1.0f, -1.0f, 1.0f,
-        1.0f, -1.0f, 1.0f,
-        1.0f, 1.0f, 1.0f,
-        -1.0f, 1.0f, 1.0f,
-
-        -1.0f, 1.0f, -1.0f,
-        -1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f, 1.0f,
-        -1.0f, 1.0f, 1.0f,
-
-        1.0f, 1.0f, 1.0f,
-        1.0f, 1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, 1.0f,
-
-        -1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, 1.0f,
-        -1.0f, -1.0f, 1.0f,
-
-        1.0f, 1.0f, -1.0f,
-        1.0f, 1.0f, 1.0f,
-        -1.0f, 1.0f, 1.0f,
-        -1.0f, 1.0f, -1.0f,
-    };
 
     private Vector3 _lightColor = new(1.0f, 1.0f, 1.0f);
     private Vector3 _lightPos = new(2, -3, 2);
@@ -185,7 +152,7 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
 
         _skyboxVbo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, _skyboxVbo);
-        GL.BufferData(BufferTarget.ArrayBuffer, _skyboxVertices.Length * sizeof(float), _skyboxVertices,
+        GL.BufferData(BufferTarget.ArrayBuffer, Skybox.SkyboxVertices.Length * sizeof(float), Skybox.SkyboxVertices,
             BufferUsageHint.StaticDraw);
         
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
@@ -277,9 +244,9 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
             return;
         }
         AudioManager.SetListenerData(_camera.Position);
-        // _lightPos.Y = (float)MathHelper.Cos(_time * 0.15f) * 5;
-        // _lightPos.X = (float)MathHelper.Sin(_time * 0.15f) * 5;
-        // _lightPos.Z = (float)MathHelper.Sin(_time * 0.15f) * 5;
+        _lightPos.Y = (float)MathHelper.Cos(_time * 0.15f) * 15;
+        _lightPos.X = (float)MathHelper.Sin(_time * 0.15f) * 15;
+        _lightPos.Z = (float)MathHelper.Sin(_time * 0.15f) * 15;
 
         if (window.KeyboardState.IsKeyPressed(Keys.F11))
         {
