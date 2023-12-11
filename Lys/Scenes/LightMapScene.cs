@@ -110,7 +110,7 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
     };
 
     private Vector3 _lightColor = new(1.0f, 1.0f, 1.0f);
-    private Vector3 _lightPos = new(2, 3, 2);
+    private Vector3 _lightPos = new(2, -3, 2);
 
     private Skybox _redSpaceSkybox;
 
@@ -132,10 +132,11 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         
         AudioManager.Init();
         AudioManager.SetListenerData(new Vector3(0,0,0));
-
+        
         /*var source = new Source();
-        var audio = AudioManager.LoadSound("Assets/call_to_arms.wav");
-        source.Play(audio);*/
+        var audio = AudioManager.LoadSound("Assets/Audio/call_to_arms.wav");
+        source.Play(audio);
+        source.SetLooping(true);*/
         
         GL.ClearColor(Color.Navy);
 
@@ -243,7 +244,9 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         GL.Enable(EnableCap.CullFace);
-        DrawCube(new Vector3(0, 0, 0));
+        DrawCube(new Vector3(0, -2, 0));
+        DrawCube(new Vector3(0, 2, 0));
+        DrawCube(new Vector3(3, 2, 2));
         
         _lightCubeShader.Use();
         GL.BindVertexArray(_lightVao);
@@ -273,7 +276,7 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         {
             return;
         }
-
+        AudioManager.SetListenerData(_camera.Position);
         // _lightPos.Y = (float)MathHelper.Cos(_time * 0.15f) * 5;
         // _lightPos.X = (float)MathHelper.Sin(_time * 0.15f) * 5;
         // _lightPos.Z = (float)MathHelper.Sin(_time * 0.15f) * 5;

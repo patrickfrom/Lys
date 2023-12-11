@@ -1,4 +1,5 @@
-#version 440 core
+#version 440
+
 struct Material {
     sampler2D diffuse;
     sampler2D specular;

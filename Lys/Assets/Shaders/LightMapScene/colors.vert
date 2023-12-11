@@ -16,7 +16,7 @@ uniform mat3 normalInverse;
 
 void main() {
     gl_Position = vec4(aPosition, 1.0) * model * view * projection;
-    fragPos = vec3(model * vec4(aPosition, 1.0));
+    fragPos = vec3(vec4(aPosition, 1.0) * model);
     normal = normalInverse * aNormal;
     texCoords = aTexCoords;
 }

@@ -19,6 +19,11 @@ public class Source
         AL.SourcePlay(_sourceId);
     }
 
+    public void SetLooping(bool enable)
+    {
+        AL.Source(_sourceId, ALSourceb.Looping, enable);
+    }
+
     public void Delete()
     {
         AL.DeleteSource(_sourceId);
