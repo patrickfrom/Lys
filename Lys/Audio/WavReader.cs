@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using OpenTK.Audio.OpenAL;
 
 namespace Lys.Audio;
 
@@ -74,5 +75,15 @@ public class WavReader : IDisposable
     public void Dispose()
     {
         _fileStream.Dispose();
+    }
+
+    public ALFormat GetOpenAlFormat()
+    {
+        if (AudioFormat.Channels == 1)
+        {
+            return AudioFormat.BitsPerSample == 8 ? ALFormat.Mono8 : ALFormat.Mono16;
+        }
+
+        return AudioFormat.BitsPerSample == 8 ? ALFormat.Stereo8 : ALFormat.Stereo16;
     }
 }
