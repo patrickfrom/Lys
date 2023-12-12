@@ -100,11 +100,6 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         AudioManager.Init();
         AudioManager.SetListenerData(new Vector3(0,0,0));
         
-        /*var source = new Source();
-        var audio = AudioManager.LoadSound("Assets/Audio/call_to_arms.wav");
-        source.Play(audio);
-        source.SetLooping(true);*/
-        
         GL.ClearColor(Color.Navy);
 
         _vao = GL.GenVertexArray();

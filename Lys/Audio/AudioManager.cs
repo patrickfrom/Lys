@@ -24,7 +24,7 @@ public static class AudioManager
         using var wavReader = new WavReader(file);
         var audioFormat = wavReader.AudioFormat;
         
-        AL.BufferData(buffer, wavReader.GetOpenAlFormat() , wavReader.Data, audioFormat.SampleRate);
+        AL.BufferData(buffer, wavReader.GetOpenAlFormat(), wavReader.Data, audioFormat.SampleRate);
 
         return buffer;
     }

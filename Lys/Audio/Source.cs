@@ -9,8 +9,9 @@ public class Source
     public Source()
     {
         _sourceId = AL.GenSource();
-        
+
         AL.Source(_sourceId, ALSourcef.Gain, 1.0f);
+        AL.Source(_sourceId, ALSourcef.Pitch, 1.0f);
     }
 
     public void Play(int buffer)
