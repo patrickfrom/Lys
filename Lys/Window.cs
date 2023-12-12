@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Text;
 using Lys.Scenes;
 using Lys.Utils;
@@ -21,7 +22,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     protected override void OnLoad()
     {
         GlDebugger.Init();
-        
+ 
         _currentScene = new LightMapScene(this, "Light Maps");
         //_currentScene = new LightCasterScene(this, "Light Caster");
         

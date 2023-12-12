@@ -81,32 +81,36 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
 
     private Skybox _redSpaceSkybox;
 
-    private Texture _container;
-    private Texture _containerSpecular;
-    private Texture _containerSpecularColor;
-    private Texture _pinkColorSpecular;
-    private Texture _emissionMap;
-    private Texture _normalMap;
-    
+    private Texture2D _container;
+    private Texture2D _containerSpecular;
+    private Texture2D _containerSpecularColor;
+    private Texture2D _pinkColorSpecular;
+    private Texture2D _emissionMap;
+    private Texture2D _normalMap;
+
     private int _ebo;
     private int _vbo;
     private int _skyboxVbo;
     private int _skyboxEbo;
     private Source _source;
 
+    private Model _testModel;
+    private Shader _testShader;
 
     public override void OnLoad()
     {
         base.OnLoad();
-        
+
         AudioManager.Init();
-        AudioManager.SetListenerData(new Vector3(0,0,0));
+        AudioManager.SetListenerData(new Vector3(0, 0, 0));
+
+        _testModel = new Model("Assets/Models/cat.obj");
 
         var evangeline = AudioManager.LoadSound("Assets/Audio/evangeline-matthew_sweet.wav");
         _source = new Source();
         _source.Play(evangeline);
         _source.SetLooping(true);
-        
+
         GL.ClearColor(Color.Navy);
 
         _vao = GL.GenVertexArray();
@@ -139,7 +143,7 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
 
         GL.EnableVertexAttribArray(0);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
-        
+
         _lightVao = GL.GenVertexArray();
         GL.BindVertexArray(_lightVao);
 
@@ -148,7 +152,7 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
 
         GL.EnableVertexAttribArray(0);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
-        
+
         _skyboxVao = GL.GenVertexArray();
         GL.BindVertexArray(_skyboxVao);
 
@@ -156,22 +160,25 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         GL.BindBuffer(BufferTarget.ArrayBuffer, _skyboxVbo);
         GL.BufferData(BufferTarget.ArrayBuffer, Skybox.SkyboxVertices.Length * sizeof(float), Skybox.SkyboxVertices,
             BufferUsageHint.StaticDraw);
-        
+
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
 
         GL.EnableVertexAttribArray(0);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
 
-        _lightingShader = new Shader("Assets/Shaders/LightMapScene/colors.vert", "Assets/Shaders/LightMapScene/colors.frag");
-        _lightCubeShader = new Shader("Assets/Shaders/LightMapScene/lightCube.vert", "Assets/Shaders/LightMapScene/lightCube.frag");
+        _lightingShader = new Shader("Assets/Shaders/LightMapScene/colors.vert",
+            "Assets/Shaders/LightMapScene/colors.frag");
+        _lightCubeShader = new Shader("Assets/Shaders/LightMapScene/lightCube.vert",
+            "Assets/Shaders/LightMapScene/lightCube.frag");
         _skyboxShader = new Shader("Assets/Shaders/skybox.vert", "Assets/Shaders/skybox.frag");
+        _testShader = new Shader("Assets/Shaders/test.vert", "Assets/Shaders/test.frag");
 
-        _container = new Texture("Assets/Textures/rusted-panels_albedo.png");
-        _containerSpecular = new Texture("Assets/Textures/rusted-panels_metallic.png");
-        _normalMap = new Texture("Assets/Textures/rusted-panels_normal-ogl.png");
-        _containerSpecularColor = new Texture("Assets/Textures/lighting_maps_specular_color.png");
-        _pinkColorSpecular = new Texture("Assets/Textures/pink.png");
-        _emissionMap = new Texture("Assets/Textures/matrix.jpg");
+        _container = new Texture2D("Assets/Textures/rusted-panels_albedo.png");
+        _containerSpecular = new Texture2D("Assets/Textures/rusted-panels_metallic.png");
+        _normalMap = new Texture2D("Assets/Textures/rusted-panels_normal-ogl.png");
+        _containerSpecularColor = new Texture2D("Assets/Textures/lighting_maps_specular_color.png");
+        _pinkColorSpecular = new Texture2D("Assets/Textures/pink.png");
+        _emissionMap = new Texture2D("Assets/Textures/matrix.jpg");
 
         var redSkyboxPaths = new[]
         {
@@ -182,7 +189,7 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
             "Assets/Skybox/RedSpace/bkg3_front5.png",
             "Assets/Skybox/RedSpace/bkg3_back6.png",
         };
-        
+
         _redSpaceSkybox = new Skybox(redSkyboxPaths);
         _skyboxShader.Use();
         _skyboxShader.SetInt("skybox", 0);
@@ -197,8 +204,8 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
 
         window.CursorState = CursorState.Grabbed;
 
-        GL.Enable(EnableCap.Blend);
-        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+        //GL.Enable(EnableCap.Blend);
+        //GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
         GL.Enable(EnableCap.DepthTest);
         GL.CullFace(CullFaceMode.Back);
@@ -213,10 +220,18 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         GL.Enable(EnableCap.CullFace);
-        DrawCube(new Vector3(0, -2, 0));
-        DrawCube(new Vector3(0, 2, 0));
-        DrawCube(new Vector3(3, 2, 2));
-        
+         DrawCube(new Vector3(0, -2, 0));
+         DrawCube(new Vector3(0, 2, 0));
+         DrawCube(new Vector3(3, 2, 2));
+
+         _testShader.Use();
+         var model = Matrix4.Identity;
+         
+         _testShader.SetMatrix4("model", model);
+         _testShader.SetMatrix4("view", _camera.GetViewMatrix());
+         _testShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
+        _testModel.Draw(_testShader);
+
         _lightCubeShader.Use();
         GL.BindVertexArray(_lightVao);
         var model2 = Matrix4.CreateTranslation(_lightPos);
@@ -245,6 +260,7 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         {
             return;
         }
+
         AudioManager.SetListenerData(_camera.Position);
         _lightPos.Y = (float)MathHelper.Cos(_time * 0.15f) * 15;
         _lightPos.X = (float)MathHelper.Sin(_time * 0.15f) * 15;
@@ -278,22 +294,22 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         GL.DeleteVertexArray(_vao);
         GL.DeleteVertexArray(_lightVao);
         GL.DeleteVertexArray(_skyboxVao);
-        
+
         GL.DeleteBuffer(_vbo);
         GL.DeleteBuffer(_ebo);
         GL.DeleteBuffer(_skyboxVbo);
 
         _lightingShader.Dispose();
         _lightCubeShader.Dispose();
-        
+
         GL.DeleteTexture(_container.Id);
         GL.DeleteTexture(_containerSpecular.Id);
         GL.DeleteTexture(_containerSpecularColor.Id);
         GL.DeleteTexture(_pinkColorSpecular.Id);
         GL.DeleteTexture(_emissionMap.Id);
-        
+
         GL.DeleteTexture(_redSpaceSkybox.Id);
-        
+
         AudioManager.Cleanup();
         _source.Delete();
     }
@@ -315,16 +331,16 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
 
         var diffuseColor = _lightColor * new Vector3(0.5f);
         var ambientColor = diffuseColor * new Vector3(0.5f);
-        
+
         _lightingShader.SetVector3("light.position", _lightPos);
         _lightingShader.SetVector3("light.ambient", ambientColor);
         _lightingShader.SetVector3("light.diffuse", diffuseColor);
         _lightingShader.SetVector3("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
-        
+
         _container.Use();
         _containerSpecular.Use(1);
         _emissionMap.Use(2);
-        
+
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
     }
 }

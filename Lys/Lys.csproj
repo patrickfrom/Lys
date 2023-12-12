@@ -5,9 +5,11 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="AssimpNet" Version="4.1.0" />
         <PackageReference Include="OpenTK.Audio.OpenAL" Version="4.8.2" />
         <PackageReference Include="OpenTK.Graphics" Version="4.8.2"/>
         <PackageReference Include="OpenTK.Windowing.Desktop" Version="4.8.2"/>
@@ -19,6 +21,12 @@
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Audio\call_to_arms.wav">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Shaders\test.frag">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Shaders\test.vert">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
