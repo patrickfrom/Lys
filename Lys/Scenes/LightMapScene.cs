@@ -92,6 +92,8 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
     private int _vbo;
     private int _skyboxVbo;
     private int _skyboxEbo;
+    private Source _source;
+
 
     public override void OnLoad()
     {
@@ -99,6 +101,11 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         
         AudioManager.Init();
         AudioManager.SetListenerData(new Vector3(0,0,0));
+
+        var evangeline = AudioManager.LoadSound("Assets/Audio/evangeline-matthew_sweet.wav");
+        _source = new Source();
+        _source.Play(evangeline);
+        _source.SetLooping(true);
         
         GL.ClearColor(Color.Navy);
 
@@ -286,6 +293,9 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         GL.DeleteTexture(_emissionMap.Id);
         
         GL.DeleteTexture(_redSpaceSkybox.Id);
+        
+        AudioManager.Cleanup();
+        _source.Delete();
     }
 
     private void DrawCube(Vector3 position)

@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using OpenTK.Audio.OpenAL;
 
 namespace Lys.Audio;
 
@@ -12,14 +11,6 @@ public class AudioFormat(int sampleRate, int channels, int bitsPerSample)
 
 public class WavReader : IDisposable
 {
-    /*
-     Example, even though I'll probably remember how to use it (But you never know if my brain is a bit mushy)
-     using var wavReader = new WavReader("Assets/call_to_arms.wav");
-     Console.WriteLine(wavReader.AudioFormat.SampleRate);
-     Console.WriteLine(wavReader.AudioFormat.Channels);
-     Console.WriteLine(wavReader.AudioFormat.BitsPerSample);
-     Console.WriteLine(wavReader.Data.Length);*/
-
     private readonly FileStream _fileStream;
 
     public AudioFormat AudioFormat { get; private set; }
@@ -75,15 +66,5 @@ public class WavReader : IDisposable
     public void Dispose()
     {
         _fileStream.Dispose();
-    }
-
-    public ALFormat GetOpenAlFormat()
-    {
-        if (AudioFormat.Channels == 1)
-        {
-            return AudioFormat.BitsPerSample == 8 ? ALFormat.Mono8 : ALFormat.Mono16;
-        }
-
-        return AudioFormat.BitsPerSample == 8 ? ALFormat.Stereo8 : ALFormat.Stereo16;
     }
 }
