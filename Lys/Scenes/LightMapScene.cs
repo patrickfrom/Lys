@@ -220,17 +220,11 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         GL.Enable(EnableCap.CullFace);
-         DrawCube(new Vector3(0, -2, 0));
-         DrawCube(new Vector3(0, 2, 0));
-         DrawCube(new Vector3(3, 2, 2));
-
-         _testShader.Use();
-         var model = Matrix4.Identity;
-         
-         _testShader.SetMatrix4("model", model);
-         _testShader.SetMatrix4("view", _camera.GetViewMatrix());
-         _testShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
-        _testModel.Draw(_testShader);
+        DrawCube(new Vector3(0, -2, 0));
+        DrawCube(new Vector3(0, 2, 0));
+        DrawCube(new Vector3(3, 2, 2));
+        
+        _testModel.Draw(_lightingShader);
 
         _lightCubeShader.Use();
         GL.BindVertexArray(_lightVao);

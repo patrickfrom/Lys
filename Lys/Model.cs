@@ -23,7 +23,7 @@ public class Model
     private void LoadModel(string path)
     {
         var importer = new AssimpContext();
-        var scene = importer.ImportFile(path);
+        var scene = importer.ImportFile(path, PostProcessSteps.Triangulate | PostProcessSteps.FlipUVs);
 
         if (scene == null || scene.SceneFlags == SceneFlags.Incomplete || scene.RootNode == null)
         {
