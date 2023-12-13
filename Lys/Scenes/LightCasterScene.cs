@@ -7,10 +7,11 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Lys.Scenes;
 
-public struct SpotLight(Vector3 position, Vector3 color)
+public struct SpotLight(Vector3 position, Vector3 color, float constant = 1.0f)
 {
     public Vector3 Position = position;
     public Vector3 Color = color;
+    public float Constant = constant;
 }
 
 public class LightCasterScene(NativeWindow window, string title = "Default Scene") : Scene(window, title)
@@ -87,8 +88,8 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
 
     private SpotLight[] _pointLights =
     {
-        new(new Vector3(0,1,0), new Vector3(1,0,0)),
-        new(new Vector3(0,-1,0), new Vector3(0,1,0)),
+        new(new Vector3(55,1,0), new Vector3(1,0,0)),
+        new(new Vector3(0,-1,0), new Vector3(0,1,0), 0.5f),
         new(new Vector3(0,0,3), new Vector3(1,1,0)),
     };
 
@@ -231,12 +232,7 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
         var diffuseColor = _lightColor * new Vector3(0.5f);
-        var ambientColor = diffuseColor * new Vector3(0.5f);
-
-        /*_defaultShader.SetVector3("light.position", _lightPos);
-        _defaultShader.SetVector3("light.ambient", ambientColor);
-        _defaultShader.SetVector3("light.diffuse", diffuseColor);
-        _defaultShader.SetVector3("light.specular", new Vector3(1.0f, 1.0f, 1.0f));*/
+        var ambientColor = diffuseColor * new Vector3(0.5f);    
 
         _defaultShader.SetVector3("directionalLight.direction", new Vector3(-5, -10, 0));
         _defaultShader.SetVector3("directionalLight.ambient", ambientColor);
@@ -247,8 +243,8 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         {
             var pointLight = _pointLights[i];
             _defaultShader.SetVector3($"pointLight[{i}].position", pointLight.Position);
-            _defaultShader.SetVector3($"pointLight[{i}].diffuse", diffuseColor + pointLight.Color);
-            _defaultShader.SetFloat($"pointLight[{i}].constant", 1.0f);
+            _defaultShader.SetVector3($"pointLight[{i}].diffuse", pointLight.Color);
+            _defaultShader.SetFloat($"pointLight[{i}].constant", pointLight.Constant);
             _defaultShader.SetFloat($"pointLight[{i}].linear", 0.09f);
             _defaultShader.SetFloat($"pointLight[{i}].quadratic", 0.002f);
 
@@ -261,6 +257,25 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
             _lightCubeShader.SetVector3("color", pointLight.Color);
             GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         }
+        
+        // spot light
+        _defaultShader.SetVector3("spotLight.position", new Vector3(0, 1, 0));
+        _defaultShader.SetVector3("spotLight.direction", new Vector3(0,-1,0));
+        _defaultShader.SetVector3("spotLight.diffuse", new Vector3(1.0f, 0.0f, 0));
+        _defaultShader.SetFloat("spotLight.constant", 0.2f);
+        _defaultShader.SetFloat("spotLight.cutOff", float.DegreesToRadians(55));
+        _defaultShader.SetFloat("spotLight.outerCutOff", float.DegreesToRadians(35));
+        _defaultShader.SetFloat("spotLight.linear", 0.09f);
+        _defaultShader.SetFloat("spotLight.quadratic", 0.002f);
+
+        GL.BindVertexArray(_vao);
+        model = Matrix4.Identity;
+        model *= Matrix4.CreateScale(0.25f);
+        model *= Matrix4.CreateTranslation(new Vector3(0, 1, 0));
+
+        _lightCubeShader.SetMatrix4("model", model);
+        _lightCubeShader.SetVector3("color", new Vector3(1.0f, 0, 0));
+        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         
         GL.Disable(EnableCap.CullFace);
 
