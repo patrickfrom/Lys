@@ -88,9 +88,9 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
 
     private SpotLight[] _pointLights =
     {
-        new(new Vector3(55,1,0), new Vector3(1,0,0)),
-        new(new Vector3(0,-1,0), new Vector3(0,1,0), 2.5f),
-        new(new Vector3(0,0,3), new Vector3(0,1,1)),
+        new(new Vector3(55,1,0), new Vector3(1,0,0), 0.1f),
+        new(new Vector3(0,-1,0), new Vector3(0,1,0), 0.05f),
+        new(new Vector3(0,0,3), new Vector3(0,1,1), 0.1f),
     };
 
     private Skybox _redSpaceSkybox;
@@ -241,7 +241,7 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         _defaultShader.SetMatrix4("model", model);
         _dragon.Draw(_defaultShader);
         
-        var diffuseColor = _lightColor * new Vector3(0.5f);
+        var diffuseColor = _lightColor * new Vector3(1.5f);
         var ambientColor = diffuseColor * new Vector3(0.5f);    
 
         _defaultShader.SetVector3("directionalLight.direction", new Vector3(-5, -10, 0));
@@ -255,7 +255,7 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
             _defaultShader.SetVector3($"pointLight[{i}].position", pointLight.Position);
             _defaultShader.SetVector3($"pointLight[{i}].diffuse", pointLight.Color);
             _defaultShader.SetFloat($"pointLight[{i}].constant", pointLight.Constant);
-            _defaultShader.SetFloat($"pointLight[{i}].linear", 0.09f);
+            _defaultShader.SetFloat($"pointLight[{i}].linear", 0.5f);
             _defaultShader.SetFloat($"pointLight[{i}].quadratic", 0.002f);
 
             GL.BindVertexArray(_vao);
@@ -269,19 +269,20 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         }
         
         // spot light
-        _defaultShader.SetVector3("spotLight.position", new Vector3(0, 1, 0));
-        _defaultShader.SetVector3("spotLight.direction", new Vector3(0,-1,0));
+        var spotLightPos = new Vector3(0, 6, 4);
+        _defaultShader.SetVector3("spotLight.position", spotLightPos);
+        _defaultShader.SetVector3("spotLight.direction", new Vector3(1,0,0));
         _defaultShader.SetVector3("spotLight.diffuse", new Vector3(1.0f, 0.0f, 0));
-        _defaultShader.SetFloat("spotLight.constant", 0.2f);
+        _defaultShader.SetFloat("spotLight.constant", 0.1f);
         _defaultShader.SetFloat("spotLight.cutOff", float.DegreesToRadians(55));
-        _defaultShader.SetFloat("spotLight.outerCutOff", float.DegreesToRadians(35));
+        _defaultShader.SetFloat("spotLight.outerCutOff", float.DegreesToRadians(22));
         _defaultShader.SetFloat("spotLight.linear", 0.09f);
         _defaultShader.SetFloat("spotLight.quadratic", 0.002f);
 
         GL.BindVertexArray(_vao);
         model = Matrix4.Identity;
         model *= Matrix4.CreateScale(0.25f);
-        model *= Matrix4.CreateTranslation(new Vector3(0, 1, 0));
+        model *= Matrix4.CreateTranslation(spotLightPos);
 
         _lightCubeShader.SetMatrix4("model", model);
         _lightCubeShader.SetVector3("color", new Vector3(1.0f, 0, 0));
