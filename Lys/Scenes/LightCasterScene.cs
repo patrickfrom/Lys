@@ -7,6 +7,12 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Lys.Scenes;
 
+public struct SpotLight(Vector3 position, Vector3 color)
+{
+    public Vector3 Position = position;
+    public Vector3 Color = color;
+}
+
 public class LightCasterScene(NativeWindow window, string title = "Default Scene") : Scene(window, title)
 {
     private float[] _vertices =
@@ -67,6 +73,7 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
 
     private Shader _defaultShader;
     private Shader _lightCubeShader;
+    private Shader _skyboxShader;
 
     private int _vao;
     private int _vbo;
@@ -77,6 +84,17 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
     private Texture2D _container;
     private Texture2D _containerSpecular;
     private Vector3 _lightColor = new(1.0f, 1.0f, 1.0f);
+
+    private SpotLight[] _pointLights =
+    {
+        new(new Vector3(0,1,0), new Vector3(1,0,0)),
+        new(new Vector3(0,-1,0), new Vector3(0,1,0)),
+        new(new Vector3(0,0,3), new Vector3(1,1,0)),
+    };
+
+    private Skybox _redSpaceSkybox;
+    private int _skyboxVao;
+    private int _skyboxVbo;
 
     public override void OnLoad()
     {
@@ -115,13 +133,41 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         GL.EnableVertexAttribArray(0);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
 
+        _skyboxVao = GL.GenVertexArray();
+        GL.BindVertexArray(_skyboxVao);
+
+        _skyboxVbo = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ArrayBuffer, _skyboxVbo);
+        GL.BufferData(BufferTarget.ArrayBuffer, Skybox.SkyboxVertices.Length * sizeof(float), Skybox.SkyboxVertices,
+            BufferUsageHint.StaticDraw);
+
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
+
+        GL.EnableVertexAttribArray(0);
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+
         _defaultShader = new Shader("Assets/Shaders/LightCasterScene/default.vert",
             "Assets/Shaders/LightCasterScene/default.frag");
         _lightCubeShader = new Shader("Assets/Shaders/LightMapScene/lightCube.vert",
             "Assets/Shaders/LightMapScene/lightCube.frag");
+        _skyboxShader = new Shader("Assets/Shaders/skybox.vert", "Assets/Shaders/skybox.frag");
+        
+        var redSkyboxPaths = new[]
+        {
+            "Assets/Skybox/RedSpace/bkg3_right1.png",
+            "Assets/Skybox/RedSpace/bkg3_left2.png",
+            "Assets/Skybox/RedSpace/bkg3_top3.png",
+            "Assets/Skybox/RedSpace/bkg3_bottom4.png",
+            "Assets/Skybox/RedSpace/bkg3_front5.png",
+            "Assets/Skybox/RedSpace/bkg3_back6.png",
+        };
 
-        _container = new Texture2D("Assets/Textures/rusted-panels_albedo.png");
-        _containerSpecular = new Texture2D("Assets/Textures/rusted-panels_metallic.png");
+        _redSpaceSkybox = new Skybox(redSkyboxPaths);
+        _skyboxShader.Use();
+        _skyboxShader.SetInt("skybox", 0);
+
+        _container = new Texture2D("Assets/Textures/container2.png");
+        _containerSpecular = new Texture2D("Assets/Textures/container2_specular.png");
 
         _defaultShader.SetInt("material.diffuse", 0);
         _defaultShader.SetInt("material.specular", 1);
@@ -136,12 +182,6 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
     }
 
 
-    private Vector3[] _pointLights =
-    {
-        new(0, 1, 0),
-        new(0, -2.5f, 0),
-        new(0, 0, 1.5f),
-    };
 
     public override void OnRender(FrameEventArgs e)
     {
@@ -181,7 +221,7 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         _lightCubeShader.SetMatrix4("view", _camera.GetViewMatrix());
         _lightCubeShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
 
-        GL.BindVertexArray(_vao);
+        GL.BindVertexArray(_lightVao);
         model = Matrix4.Identity;
         model *= Matrix4.CreateScale(0.5f);
         model *= Matrix4.CreateTranslation(_lightPos);
@@ -205,8 +245,9 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
 
         for (var i = 0; i < 3; i++)
         {
-            _defaultShader.SetVector3($"pointLight[{i}].position", _pointLights[i]);
-            _defaultShader.SetVector3($"pointLight[{i}].diffuse", diffuseColor);
+            var pointLight = _pointLights[i];
+            _defaultShader.SetVector3($"pointLight[{i}].position", pointLight.Position);
+            _defaultShader.SetVector3($"pointLight[{i}].diffuse", diffuseColor + pointLight.Color);
             _defaultShader.SetFloat($"pointLight[{i}].constant", 1.0f);
             _defaultShader.SetFloat($"pointLight[{i}].linear", 0.09f);
             _defaultShader.SetFloat($"pointLight[{i}].quadratic", 0.002f);
@@ -214,12 +255,23 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
             GL.BindVertexArray(_vao);
             model = Matrix4.Identity;
             model *= Matrix4.CreateScale(0.25f);
-            model *= Matrix4.CreateTranslation(_pointLights[i]);
+            model *= Matrix4.CreateTranslation(pointLight.Position);
 
             _lightCubeShader.SetMatrix4("model", model);
-            _lightCubeShader.SetVector3("color", _lightColor);
+            _lightCubeShader.SetVector3("color", pointLight.Color);
             GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         }
+        
+        GL.Disable(EnableCap.CullFace);
+
+        GL.DepthFunc(DepthFunction.Lequal);
+        _skyboxShader.Use();
+        _skyboxShader.SetMatrix4("view", new Matrix4(new Matrix3(_camera.GetViewMatrix())));
+        _skyboxShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
+        GL.BindVertexArray(_skyboxVao);
+        _redSpaceSkybox.Use();
+        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+        GL.DepthFunc(DepthFunction.Less);
     }
 
     public override void OnUpdate(FrameEventArgs e)
