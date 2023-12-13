@@ -81,7 +81,7 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
     public override void OnLoad()
     {
         base.OnLoad();
-        
+
         GL.ClearColor(Color.Navy);
 
         _vao = GL.GenVertexArray();
@@ -89,21 +89,23 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
 
         _vbo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-        GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices,
+            BufferUsageHint.StaticDraw);
 
         _ebo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
-        GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(int), _indices, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(int), _indices,
+            BufferUsageHint.StaticDraw);
 
         GL.EnableVertexAttribArray(0);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
-        
+
         GL.EnableVertexAttribArray(1);
         GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float));
-        
+
         GL.EnableVertexAttribArray(2);
         GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 6 * sizeof(float));
-        
+
         _lightVao = GL.GenVertexArray();
         GL.BindVertexArray(_lightVao);
 
@@ -112,21 +114,23 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
 
         GL.EnableVertexAttribArray(0);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
-        
-        _defaultShader = new Shader("Assets/Shaders/LightCasterScene/default.vert", "Assets/Shaders/LightCasterScene/default.frag");
-        _lightCubeShader = new Shader("Assets/Shaders/LightMapScene/lightCube.vert", "Assets/Shaders/LightMapScene/lightCube.frag");
-        
+
+        _defaultShader = new Shader("Assets/Shaders/LightCasterScene/default.vert",
+            "Assets/Shaders/LightCasterScene/default.frag");
+        _lightCubeShader = new Shader("Assets/Shaders/LightMapScene/lightCube.vert",
+            "Assets/Shaders/LightMapScene/lightCube.frag");
+
         _container = new Texture2D("Assets/Textures/rusted-panels_albedo.png");
         _containerSpecular = new Texture2D("Assets/Textures/rusted-panels_metallic.png");
-        
+
         _defaultShader.SetInt("material.diffuse", 0);
         _defaultShader.SetInt("material.specular", 1);
-        
+
         _camera = new Camera(Vector3.UnitZ * 3, window.ClientSize.X / (float)window.ClientSize.Y, window.KeyboardState,
             window.MouseState);
 
         window.CursorState = CursorState.Grabbed;
-        
+
         GL.Enable(EnableCap.DepthTest);
         GL.CullFace(CullFaceMode.Back);
     }
@@ -134,42 +138,58 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
 
     private Vector3[] _pointLights =
     {
-        new(0,1,0),
-        new(0, -1, 0),
-        new(0, 0, 1),
+        new(0, 1, 0),
+        new(0, -2.5f, 0),
+        new(0, 0, 1.5f),
     };
-    
+
     public override void OnRender(FrameEventArgs e)
     {
         base.OnRender(e);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-        
+
         GL.Enable(EnableCap.CullFace);
         _defaultShader.SetMatrix4("view", _camera.GetViewMatrix());
         _defaultShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
-        
+
         GL.BindVertexArray(_vao);
         var model = Matrix4.Identity;
+        model *= Matrix4.CreateFromAxisAngle(new Vector3(1, 1, 1), 35f);
+        model *= Matrix4.CreateTranslation(1, 0, 2);
         _defaultShader.SetMatrix4("model", model);
         _defaultShader.SetVector3("viewPos", _camera.Position);
         _defaultShader.SetMatrix3("normalInverse", new Matrix3(model.Inverted()));
 
         _defaultShader.SetFloat("material.shininess", 8.0f);
-        
+
         _container.Use();
         _containerSpecular.Use(1);
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
-        
+
+        GL.BindVertexArray(_vao);
+        model = Matrix4.Identity;
+        _defaultShader.SetMatrix4("model", model);
+        _defaultShader.SetVector3("viewPos", _camera.Position);
+        _defaultShader.SetMatrix3("normalInverse", new Matrix3(model.Inverted()));
+
+        _defaultShader.SetFloat("material.shininess", 8.0f);
+
+        _container.Use();
+        _containerSpecular.Use(1);
+        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+
         _lightCubeShader.SetMatrix4("view", _camera.GetViewMatrix());
         _lightCubeShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
-        
+
         GL.BindVertexArray(_vao);
-        model = Matrix4.CreateTranslation(_lightPos);
+        model = Matrix4.Identity;
         model *= Matrix4.CreateScale(0.5f);
+        model *= Matrix4.CreateTranslation(_lightPos);
+
         _lightCubeShader.SetMatrix4("model", model);
         _lightCubeShader.SetVector3("color", _lightColor);
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
-        
+
         var diffuseColor = _lightColor * new Vector3(0.5f);
         var ambientColor = diffuseColor * new Vector3(0.5f);
 
@@ -177,7 +197,7 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         _defaultShader.SetVector3("light.ambient", ambientColor);
         _defaultShader.SetVector3("light.diffuse", diffuseColor);
         _defaultShader.SetVector3("light.specular", new Vector3(1.0f, 1.0f, 1.0f));*/
-        
+
         _defaultShader.SetVector3("directionalLight.direction", new Vector3(-5, -10, 0));
         _defaultShader.SetVector3("directionalLight.ambient", ambientColor);
         _defaultShader.SetVector3("directionalLight.diffuse", diffuseColor);
@@ -187,11 +207,19 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         {
             _defaultShader.SetVector3($"pointLight[{i}].position", _pointLights[i]);
             _defaultShader.SetVector3($"pointLight[{i}].diffuse", diffuseColor);
-            _defaultShader.SetFloat($"pointLight[{i}].constant",  0.2f);
-            _defaultShader.SetFloat($"pointLight[{i}].linear",    0.09f);
-            _defaultShader.SetFloat($"pointLight[{i}].quadratic", 1.002f);
-        }
+            _defaultShader.SetFloat($"pointLight[{i}].constant", 1.0f);
+            _defaultShader.SetFloat($"pointLight[{i}].linear", 0.09f);
+            _defaultShader.SetFloat($"pointLight[{i}].quadratic", 0.002f);
 
+            GL.BindVertexArray(_vao);
+            model = Matrix4.Identity;
+            model *= Matrix4.CreateScale(0.25f);
+            model *= Matrix4.CreateTranslation(_pointLights[i]);
+
+            _lightCubeShader.SetMatrix4("model", model);
+            _lightCubeShader.SetVector3("color", _lightColor);
+            GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+        }
     }
 
     public override void OnUpdate(FrameEventArgs e)
@@ -205,7 +233,7 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         {
             _camera.Update(e.Time);
         }
-        
+
         base.OnUpdate(e);
     }
 
