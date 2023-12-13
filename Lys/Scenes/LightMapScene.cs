@@ -86,7 +86,6 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
     private Texture2D _containerSpecularColor;
     private Texture2D _pinkColorSpecular;
     private Texture2D _emissionMap;
-    private Texture2D _normalMap;
 
     private int _ebo;
     private int _vbo;
@@ -94,17 +93,12 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
     private int _skyboxEbo;
     private Source _source;
 
-    private Model _testModel;
-    private Shader _testShader;
-
     public override void OnLoad()
     {
         base.OnLoad();
 
         AudioManager.Init();
         AudioManager.SetListenerData(new Vector3(0, 0, 0));
-
-        _testModel = new Model("Assets/Models/cat.obj");
 
         var evangeline = AudioManager.LoadSound("Assets/Audio/evangeline-matthew_sweet.wav");
         _source = new Source();
@@ -171,11 +165,9 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         _lightCubeShader = new Shader("Assets/Shaders/LightMapScene/lightCube.vert",
             "Assets/Shaders/LightMapScene/lightCube.frag");
         _skyboxShader = new Shader("Assets/Shaders/skybox.vert", "Assets/Shaders/skybox.frag");
-        _testShader = new Shader("Assets/Shaders/test.vert", "Assets/Shaders/test.frag");
 
         _container = new Texture2D("Assets/Textures/rusted-panels_albedo.png");
         _containerSpecular = new Texture2D("Assets/Textures/rusted-panels_metallic.png");
-        _normalMap = new Texture2D("Assets/Textures/rusted-panels_normal-ogl.png");
         _containerSpecularColor = new Texture2D("Assets/Textures/lighting_maps_specular_color.png");
         _pinkColorSpecular = new Texture2D("Assets/Textures/pink.png");
         _emissionMap = new Texture2D("Assets/Textures/matrix.jpg");
@@ -223,8 +215,6 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         DrawCube(new Vector3(0, -2, 0));
         DrawCube(new Vector3(0, 2, 0));
         DrawCube(new Vector3(3, 2, 2));
-        
-        _testModel.Draw(_lightingShader);
 
         _lightCubeShader.Use();
         GL.BindVertexArray(_lightVao);
@@ -260,18 +250,6 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         _lightPos.X = (float)MathHelper.Sin(_time * 0.15f) * 15;
         _lightPos.Z = (float)MathHelper.Sin(_time * 0.15f) * 15;
 
-        if (window.KeyboardState.IsKeyPressed(Keys.F11))
-        {
-            window.WindowState = window.WindowState != WindowState.Fullscreen
-                ? WindowState.Fullscreen
-                : WindowState.Normal;
-        }
-
-        if (window.KeyboardState.IsKeyDown(Keys.Escape))
-        {
-            window.Close();
-        }
-
         if (window.KeyboardState.IsKeyPressed(Keys.F))
         {
             window.CursorState = window.CursorState == CursorState.Grabbed ? CursorState.Normal : CursorState.Grabbed;
@@ -281,6 +259,9 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         {
             _camera.Update(e.Time);
         }
+        
+        base.OnUpdate(e);
+
     }
 
     public override void OnUnload()
