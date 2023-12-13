@@ -131,6 +131,14 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         GL.CullFace(CullFaceMode.Back);
     }
 
+
+    private Vector3[] _pointLights =
+    {
+        new(0,1,0),
+        new(0, -1, 0),
+        new(0, 0, 1),
+    };
+    
     public override void OnRender(FrameEventArgs e)
     {
         base.OnRender(e);
@@ -147,25 +155,6 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         _defaultShader.SetMatrix3("normalInverse", new Matrix3(model.Inverted()));
 
         _defaultShader.SetFloat("material.shininess", 8.0f);
-        var diffuseColor = _lightColor * new Vector3(0.5f);
-        var ambientColor = diffuseColor * new Vector3(0.5f);
-
-        /*_defaultShader.SetVector3("light.position", _lightPos);
-        _defaultShader.SetVector3("light.ambient", ambientColor);
-        _defaultShader.SetVector3("light.diffuse", diffuseColor);
-        _defaultShader.SetVector3("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
-        
-        _defaultShader.SetVector3("directionalLight.direction", new Vector3(-5, -10, 0));
-        _defaultShader.SetVector3("directionalLight.ambient", ambientColor);
-        _defaultShader.SetVector3("directionalLight.diffuse", diffuseColor);
-        _defaultShader.SetVector3("directionalLight.specular", new Vector3(1.0f, 1.0f, 0.0f));*/
-        
-        _defaultShader.SetVector3("pointLight.position", new Vector3(0, 1.0f, 0));
-        _defaultShader.SetVector3("pointLight.ambient", ambientColor);
-        _defaultShader.SetVector3("pointLight.diffuse", diffuseColor);
-        _defaultShader.SetFloat("pointLight.constant",  0.2f);
-        _defaultShader.SetFloat("pointLight.linear",    0.09f);
-        _defaultShader.SetFloat("pointLight.quadratic", 1.002f);	
         
         _container.Use();
         _containerSpecular.Use(1);
@@ -180,6 +169,29 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         _lightCubeShader.SetMatrix4("model", model);
         _lightCubeShader.SetVector3("color", _lightColor);
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+        
+        var diffuseColor = _lightColor * new Vector3(0.5f);
+        var ambientColor = diffuseColor * new Vector3(0.5f);
+
+        /*_defaultShader.SetVector3("light.position", _lightPos);
+        _defaultShader.SetVector3("light.ambient", ambientColor);
+        _defaultShader.SetVector3("light.diffuse", diffuseColor);
+        _defaultShader.SetVector3("light.specular", new Vector3(1.0f, 1.0f, 1.0f));*/
+        
+        _defaultShader.SetVector3("directionalLight.direction", new Vector3(-5, -10, 0));
+        _defaultShader.SetVector3("directionalLight.ambient", ambientColor);
+        _defaultShader.SetVector3("directionalLight.diffuse", diffuseColor);
+        _defaultShader.SetVector3("directionalLight.specular", new Vector3(1.0f, 1.0f, 0.0f));
+
+        for (var i = 0; i < 3; i++)
+        {
+            _defaultShader.SetVector3($"pointLight[{i}].position", _pointLights[i]);
+            _defaultShader.SetVector3($"pointLight[{i}].diffuse", diffuseColor);
+            _defaultShader.SetFloat($"pointLight[{i}].constant",  0.2f);
+            _defaultShader.SetFloat($"pointLight[{i}].linear",    0.09f);
+            _defaultShader.SetFloat($"pointLight[{i}].quadratic", 1.002f);
+        }
+
     }
 
     public override void OnUpdate(FrameEventArgs e)
