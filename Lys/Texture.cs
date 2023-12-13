@@ -2,6 +2,6 @@ namespace Lys;
 
 public struct Texture
 {
-    public int Id;
+    public Texture2D Id;
     public string Type;
 }

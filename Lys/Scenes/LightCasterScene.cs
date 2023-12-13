@@ -97,10 +97,12 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
     private int _skyboxVao;
     private int _skyboxVbo;
 
+    private Model _cat;
+
     public override void OnLoad()
     {
         base.OnLoad();
-
+        _cat = new Model("Assets/Models/12221_Cat_v1_l3.obj");
         GL.ClearColor(Color.Navy);
 
         _vao = GL.GenVertexArray();
@@ -170,7 +172,7 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         _container = new Texture2D("Assets/Textures/container2.png");
         _containerSpecular = new Texture2D("Assets/Textures/container2_specular.png");
 
-        _defaultShader.SetInt("material.diffuse", 0);
+        _defaultShader.SetInt("material.texture_diffuse1", 0);
         _defaultShader.SetInt("material.specular", 1);
 
         _camera = new Camera(Vector3.UnitZ * 3, window.ClientSize.X / (float)window.ClientSize.Y, window.KeyboardState,
@@ -218,7 +220,8 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         _container.Use();
         _containerSpecular.Use(1);
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
-
+        GL.BindTexture(TextureTarget.Texture2D, 0);
+        
         _lightCubeShader.SetMatrix4("view", _camera.GetViewMatrix());
         _lightCubeShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
 
@@ -231,13 +234,16 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         _lightCubeShader.SetVector3("color", _lightColor);
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
+        _defaultShader.Use();
+        _cat.Draw(_defaultShader);
+        
         var diffuseColor = _lightColor * new Vector3(0.5f);
         var ambientColor = diffuseColor * new Vector3(0.5f);    
 
         _defaultShader.SetVector3("directionalLight.direction", new Vector3(-5, -10, 0));
         _defaultShader.SetVector3("directionalLight.ambient", ambientColor);
         _defaultShader.SetVector3("directionalLight.diffuse", diffuseColor);
-        _defaultShader.SetVector3("directionalLight.specular", new Vector3(1.0f, 1.0f, 0.0f));
+        _defaultShader.SetVector3("directionalLight.specular", new Vector3(1.0f, 1.0f, 1.0f));
 
         for (var i = 0; i < 3; i++)
         {

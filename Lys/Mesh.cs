@@ -44,7 +44,7 @@ public class Mesh
             }
             
             shader.SetInt($"material.{name}{number}", i);
-            GL.BindTexture(TextureTarget.Texture2D, Textures[i].Id);
+            GL.BindTexture(TextureTarget.Texture2D, Textures[i].Id.Id);
         }
         GL.ActiveTexture(TextureUnit.Texture0);
         

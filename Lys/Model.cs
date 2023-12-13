@@ -6,9 +6,11 @@ namespace Lys;
 public class Model
 {
     private List<Mesh> _meshes = [];
+    private string _directory;
     
     public Model(string path)
     {
+        _directory = path[..path.LastIndexOf('/')];
         LoadModel(path);
     }
 
@@ -85,7 +87,12 @@ public class Model
 
         if (mesh.MaterialIndex >= 0)
         {
+            var material = scene.Materials[mesh.MaterialIndex];
+            var diffuseMaps = LoadMaterialTextures(material, TextureType.Diffuse, "texture_diffuse");
+            var specularMaps = LoadMaterialTextures(material, TextureType.Specular, "texture_specular");
             
+            textures.AddRange(diffuseMaps);
+            textures.AddRange(specularMaps);
         }
 
         return new Mesh(vertices, indices, textures);
@@ -93,6 +100,18 @@ public class Model
 
     private List<Texture> LoadMaterialTextures(Material material, TextureType type, string typeName)
     {
-        return new List<Texture>();
+        var textures = new List<Texture>();
+
+        for (var i = 0; i < material.GetMaterialTextureCount(type); i++)
+        {
+            material.GetMaterialTexture(type, i, out var textureSlot);
+            Texture texture;
+            texture.Id = new Texture2D(_directory + "/" + textureSlot.FilePath);
+            texture.Type = typeName;
+            
+            textures.Add(texture);
+        }
+        
+        return textures;
     }
 }
