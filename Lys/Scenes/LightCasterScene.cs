@@ -89,20 +89,20 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
     private SpotLight[] _pointLights =
     {
         new(new Vector3(55,1,0), new Vector3(1,0,0)),
-        new(new Vector3(0,-1,0), new Vector3(0,1,0), 0.5f),
-        new(new Vector3(0,0,3), new Vector3(1,1,0)),
+        new(new Vector3(0,-1,0), new Vector3(0,1,0), 2.5f),
+        new(new Vector3(0,0,3), new Vector3(0,1,1)),
     };
 
     private Skybox _redSpaceSkybox;
     private int _skyboxVao;
     private int _skyboxVbo;
 
-    private Model _cat;
+    private Model _dragon;
 
     public override void OnLoad()
     {
         base.OnLoad();
-        _cat = new Model("Assets/Models/12221_Cat_v1_l3.obj");
+        _dragon = new Model("Assets/Models/fg_spkMgDragon.obj");
         GL.ClearColor(Color.Navy);
 
         _vao = GL.GenVertexArray();
@@ -173,7 +173,7 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         _containerSpecular = new Texture2D("Assets/Textures/container2_specular.png");
 
         _defaultShader.SetInt("material.texture_diffuse1", 0);
-        _defaultShader.SetInt("material.specular", 1);
+        _defaultShader.SetInt("material.texture_specular1", 1);
 
         _camera = new Camera(Vector3.UnitZ * 3, window.ClientSize.X / (float)window.ClientSize.Y, window.KeyboardState,
             window.MouseState);
@@ -235,7 +235,11 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
         _defaultShader.Use();
-        _cat.Draw(_defaultShader);
+        model = Matrix4.Identity;
+        model *= Matrix4.CreateScale(50f);
+        model *= Matrix4.CreateTranslation(new Vector3(3,3,3));
+        _defaultShader.SetMatrix4("model", model);
+        _dragon.Draw(_defaultShader);
         
         var diffuseColor = _lightColor * new Vector3(0.5f);
         var ambientColor = diffuseColor * new Vector3(0.5f);    

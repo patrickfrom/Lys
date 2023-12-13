@@ -2,7 +2,7 @@
 
 struct Material {
     sampler2D texture_diffuse1;
-    sampler2D specular;
+    sampler2D texture_specular1;
 
     float shininess;
 };
@@ -66,7 +66,7 @@ vec3 CalculateDirectionalLight(DirectionalLight light, vec3 norm, vec3 viewDir) 
 
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = light.specular * spec * texture(material.specular, texCoords).rgb;
+    vec3 specular = light.specular * spec * texture(material.texture_specular1, texCoords).rgb;
 
     return (ambient + diffuse + specular);
 }
@@ -80,7 +80,7 @@ vec3 CalculatePointLight(PointLight light, vec3 norm, vec3 fragP, vec3 viewDir) 
 
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = light.specular * spec * texture(material.specular, texCoords).rgb;
+    vec3 specular = light.specular * spec * texture(material.texture_specular1, texCoords).rgb;
 
     float distance = length(light.position - fragP);
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
@@ -102,7 +102,7 @@ vec3 CalculateSpotLight(SpotLight light, vec3 norm, vec3 viewDir) {
 
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = light.specular * spec * texture(material.specular, texCoords).rgb;
+    vec3 specular = light.specular * spec * texture(material.texture_specular1, texCoords).rgb;
 
     float theta = dot(lightDir, normalize(-light.direction));
     float epsilon = (light.cutOff - light.outerCutOff);

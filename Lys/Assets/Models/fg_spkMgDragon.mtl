@@ -1,0 +1,10 @@
+newmtl fg_spkMgDragon
+illum 4
+Kd 0.50 0.50 0.50
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.50 0.50 0.50
+map_Ka fg_spkMgDragon_diffuse.jpg
+map_Kd fg_spkMgDragon_diffuse.jpg
+map_Ks fg_spkMgDragon_specular.jpg
