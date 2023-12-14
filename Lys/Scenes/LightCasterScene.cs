@@ -7,7 +7,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Lys.Scenes;
 
-public struct SpotLight(Vector3 position, Vector3 color, float constant = 1.0f)
+public struct PointLight(Vector3 position, Vector3 color, float constant = 1.0f)
 {
     public Vector3 Position = position;
     public Vector3 Color = color;
@@ -207,7 +207,7 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         
         _defaultShader.Use();
         var model = Matrix4.Identity;
-        model *= Matrix4.CreateScale(50f);
+        model *= Matrix4.CreateScale(1f);
         model *= Matrix4.CreateTranslation(new Vector3(3,3,3));
         _defaultShader.SetMatrix4("model", model);
         _dragon.Draw(_defaultShader);
