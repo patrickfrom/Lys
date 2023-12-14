@@ -6,8 +6,10 @@ namespace Lys;
 public class Model
 {
     private List<Mesh> _meshes = [];
+    private List<Texture> _texturesLoaded = [];
+
     private string _directory;
-    
+
     public Model(string path)
     {
         _directory = path[..path.LastIndexOf('/')];
@@ -32,7 +34,7 @@ public class Model
             Console.WriteLine("ERROR::ASSIMP::");
             return;
         }
-        
+
         ProcessNode(scene.RootNode, scene);
     }
 
@@ -72,7 +74,7 @@ public class Model
             {
                 vertex.TexCoords = new Vector2(0.0f, 0.0f);
             }
-            
+
             vertices.Add(vertex);
         }
 
@@ -90,7 +92,7 @@ public class Model
             var material = scene.Materials[mesh.MaterialIndex];
             var diffuseMaps = LoadMaterialTextures(material, TextureType.Diffuse, "texture_diffuse");
             var specularMaps = LoadMaterialTextures(material, TextureType.Specular, "texture_specular");
-            
+
             textures.AddRange(diffuseMaps);
             textures.AddRange(specularMaps);
         }
@@ -104,14 +106,26 @@ public class Model
 
         for (var i = 0; i < material.GetMaterialTextureCount(type); i++)
         {
+            string? path = null;
+            var skip = false;
+            for (var j = 0; j < _texturesLoaded.Count; j++)
+            {
+                if (_texturesLoaded[j].Path != path) continue;
+                textures.Add(_texturesLoaded[j]);
+                skip = true;
+                break;
+            }
+
+            if (skip) continue;
             material.GetMaterialTexture(type, i, out var textureSlot);
             Texture texture;
             texture.Id = new Texture2D(_directory + "/" + textureSlot.FilePath);
             texture.Type = typeName;
-            
+            texture.Path = textureSlot.FilePath;
+
             textures.Add(texture);
         }
-        
+
         return textures;
     }
 }

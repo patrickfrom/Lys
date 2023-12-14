@@ -98,6 +98,8 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
     private int _skyboxVbo;
 
     private Model _dragon;
+    private Vector3 _spotLightPos = new(1, 3, 3);
+    private Vector3 _spotLightDirection = new(0, -1, 0);
 
     public override void OnLoad()
     {
@@ -194,54 +196,23 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         GL.Enable(EnableCap.CullFace);
         _defaultShader.SetMatrix4("view", _camera.GetViewMatrix());
         _defaultShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
-
-        GL.BindVertexArray(_vao);
-        var model = Matrix4.Identity;
-        model *= Matrix4.CreateFromAxisAngle(new Vector3(1, 1, 1), 35f);
-        model *= Matrix4.CreateTranslation(1, 0, 2);
-        _defaultShader.SetMatrix4("model", model);
         _defaultShader.SetVector3("viewPos", _camera.Position);
-        _defaultShader.SetMatrix3("normalInverse", new Matrix3(model.Inverted()));
-
-        _defaultShader.SetFloat("material.shininess", 8.0f);
-
-        _container.Use();
-        _containerSpecular.Use(1);
-        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
-
-        GL.BindVertexArray(_vao);
-        model = Matrix4.Identity;
-        _defaultShader.SetMatrix4("model", model);
-        _defaultShader.SetVector3("viewPos", _camera.Position);
-        _defaultShader.SetMatrix3("normalInverse", new Matrix3(model.Inverted()));
-
-        _defaultShader.SetFloat("material.shininess", 8.0f);
-
-        _container.Use();
-        _containerSpecular.Use(1);
-        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
         
         _lightCubeShader.SetMatrix4("view", _camera.GetViewMatrix());
         _lightCubeShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
-
-        GL.BindVertexArray(_lightVao);
-        model = Matrix4.Identity;
-        model *= Matrix4.CreateScale(0.5f);
-        model *= Matrix4.CreateTranslation(_lightPos);
-
-        _lightCubeShader.SetMatrix4("model", model);
-        _lightCubeShader.SetVector3("color", _lightColor);
-        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
-
+        
+        DrawCube(new Vector3(0, 0, 0));
+        DrawCube(new Vector3(-2, 0, -1), 35f);
+        DrawCube(new Vector3(1, 2, 3));
+        
         _defaultShader.Use();
-        model = Matrix4.Identity;
+        var model = Matrix4.Identity;
         model *= Matrix4.CreateScale(50f);
         model *= Matrix4.CreateTranslation(new Vector3(3,3,3));
         _defaultShader.SetMatrix4("model", model);
         _dragon.Draw(_defaultShader);
         
-        var diffuseColor = _lightColor * new Vector3(1.5f);
+        var diffuseColor = _lightColor * new Vector3(1.0f);
         var ambientColor = diffuseColor * new Vector3(0.5f);    
 
         _defaultShader.SetVector3("directionalLight.direction", new Vector3(-5, -10, 0));
@@ -269,20 +240,19 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         }
         
         // spot light
-        var spotLightPos = new Vector3(0, 6, 4);
-        _defaultShader.SetVector3("spotLight.position", spotLightPos);
-        _defaultShader.SetVector3("spotLight.direction", new Vector3(1,0,0));
-        _defaultShader.SetVector3("spotLight.diffuse", new Vector3(1.0f, 0.0f, 0));
-        _defaultShader.SetFloat("spotLight.constant", 0.1f);
-        _defaultShader.SetFloat("spotLight.cutOff", float.DegreesToRadians(55));
-        _defaultShader.SetFloat("spotLight.outerCutOff", float.DegreesToRadians(22));
+        _defaultShader.SetVector3("spotLight.position", _spotLightPos);
+        _defaultShader.SetVector3("spotLight.direction", _spotLightDirection);
+        _defaultShader.SetVector3("spotLight.diffuse", new Vector3(2.0f, 0.0f, 0.0f));
+        _defaultShader.SetFloat("spotLight.constant", 1.0f);
+        _defaultShader.SetFloat("spotLight.cutOff", MathHelper.DegreesToRadians(55));
+        _defaultShader.SetFloat("spotLight.outerCutOff", MathHelper.DegreesToRadians(50));
         _defaultShader.SetFloat("spotLight.linear", 0.09f);
         _defaultShader.SetFloat("spotLight.quadratic", 0.002f);
 
         GL.BindVertexArray(_vao);
         model = Matrix4.Identity;
         model *= Matrix4.CreateScale(0.25f);
-        model *= Matrix4.CreateTranslation(spotLightPos);
+        model *= Matrix4.CreateTranslation(_spotLightPos);
 
         _lightCubeShader.SetMatrix4("model", model);
         _lightCubeShader.SetVector3("color", new Vector3(1.0f, 0, 0));
@@ -300,6 +270,21 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         GL.DepthFunc(DepthFunction.Less);
     }
 
+    private void DrawCube(Vector3 position, float angle = 0)
+    {
+        GL.BindVertexArray(_vao);
+        var model = Matrix4.Identity;
+        model *= Matrix4.CreateFromAxisAngle(new Vector3(1, 1, 1), angle);
+        model *= Matrix4.CreateTranslation(position);
+        _defaultShader.SetMatrix4("model", model);
+        _defaultShader.SetMatrix3("normalInverse", new Matrix3(model.Inverted()));
+        _defaultShader.SetFloat("material.shininess", 8.0f);
+
+        _container.Use();
+        _containerSpecular.Use(1);
+        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+    }
+
     public override void OnUpdate(FrameEventArgs e)
     {
         if (window.KeyboardState.IsKeyPressed(Keys.F))
@@ -310,6 +295,36 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         if (window.CursorState == CursorState.Grabbed)
         {
             _camera.Update(e.Time);
+        }
+
+        if (window.KeyboardState.IsKeyDown(Keys.T))
+        {
+            _spotLightPos.Y += 0.01f;
+        }
+        
+        if (window.KeyboardState.IsKeyDown(Keys.G))
+        {
+            _spotLightPos.Y -= 0.01f;
+        }
+        
+        if (window.KeyboardState.IsKeyDown(Keys.Left))
+        {
+            _spotLightPos.X -= 0.01f;
+        }
+        
+        if (window.KeyboardState.IsKeyDown(Keys.Right))
+        {
+            _spotLightPos.X += 0.01f;
+        }
+        
+        if (window.KeyboardState.IsKeyDown(Keys.Up))
+        {
+            _spotLightPos.Z -= 0.01f;
+        }
+        
+        if (window.KeyboardState.IsKeyDown(Keys.Down))
+        {
+            _spotLightPos.Z += 0.01f;
         }
 
         base.OnUpdate(e);
