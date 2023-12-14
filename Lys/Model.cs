@@ -1,4 +1,5 @@
 using Assimp;
+using OpenTK.Graphics.ES11;
 using OpenTK.Mathematics;
 
 namespace Lys;
@@ -119,7 +120,8 @@ public class Model
             if (skip) continue;
             material.GetMaterialTexture(type, i, out var textureSlot);
             Texture texture;
-            texture.Id = new Texture2D(_directory + "/" + textureSlot.FilePath);
+            var texture2D = new Texture2D(_directory + "/" + textureSlot.FilePath);
+            texture.Id = texture2D.Id;
             texture.Type = typeName;
             texture.Path = textureSlot.FilePath;
 
