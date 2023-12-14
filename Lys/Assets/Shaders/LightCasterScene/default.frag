@@ -54,7 +54,8 @@ uniform DirectionalLight directionalLight;
 
 #define NUM_POINT_LIGHTS 3
 uniform PointLight pointLight[NUM_POINT_LIGHTS];
-uniform SpotLight spotLight;
+#define NUM_SPOT_LIGHTS 2
+uniform SpotLight spotLight[NUM_SPOT_LIGHTS];
 uniform vec3 viewPos;
 
 vec3 CalculateDirectionalLight(DirectionalLight light, vec3 norm, vec3 viewDir) {
@@ -129,7 +130,9 @@ void main() {
         result += CalculatePointLight(pointLight[i], norm, fragPos, viewDir);
     }
 
-    result += CalculateSpotLight(spotLight, norm, viewDir);
+    for (int i = 0; i < NUM_SPOT_LIGHTS; i++) {
+        result += CalculateSpotLight(spotLight[i], norm, viewDir);
+    }
 
     FragColor = vec4(result, 1.0);
 }

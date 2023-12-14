@@ -14,6 +14,13 @@ public struct PointLight(Vector3 position, Vector3 color, float constant = 1.0f)
     public float Constant = constant;
 }
 
+public struct SpotLight(Vector3 position, Vector3 direction, Vector3 color)
+{
+    public Vector3 Position = position;
+    public Vector3 Direction = direction;
+    public Vector3 Color = color;
+}
+
 public class LightCasterScene(NativeWindow window, string title = "Default Scene") : Scene(window, title)
 {
     private float[] _vertices =
@@ -86,11 +93,17 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
     private Texture2D _containerSpecular;
     private Vector3 _lightColor = new(1.0f, 1.0f, 1.0f);
 
-    private SpotLight[] _pointLights =
+    private PointLight[] _pointLights =
     {
-        new(new Vector3(55,1,0), new Vector3(1,0,0), 0.1f),
+        new(new Vector3(-2,-1,0), new Vector3(1,0,0), 0.1f),
         new(new Vector3(0,-1,0), new Vector3(0,1,0), 0.05f),
         new(new Vector3(0,0,3), new Vector3(0,1,1), 0.1f),
+    };
+
+    private SpotLight[] _spotLights =
+    {
+        new(new Vector3(1, 3, 3), new Vector3(0, -1, 0), new Vector3(1,0,0)),
+        new(new Vector3(0, 1f, 0), new Vector3(0, -1, 0), new Vector3(1,1,1)),
     };
 
     private Skybox _redSpaceSkybox;
@@ -98,8 +111,6 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
     private int _skyboxVbo;
 
     private Model _dragon;
-    private Vector3 _spotLightPos = new(1, 3, 3);
-    private Vector3 _spotLightDirection = new(0, -1, 0);
 
     public override void OnLoad()
     {
@@ -207,7 +218,7 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         
         _defaultShader.Use();
         var model = Matrix4.Identity;
-        model *= Matrix4.CreateScale(1f);
+        model *= Matrix4.CreateScale(50f);
         model *= Matrix4.CreateTranslation(new Vector3(3,3,3));
         _defaultShader.SetMatrix4("model", model);
         _dragon.Draw(_defaultShader);
@@ -238,25 +249,29 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
             _lightCubeShader.SetVector3("color", pointLight.Color);
             GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         }
-        
-        // spot light
-        _defaultShader.SetVector3("spotLight.position", _spotLightPos);
-        _defaultShader.SetVector3("spotLight.direction", _spotLightDirection);
-        _defaultShader.SetVector3("spotLight.diffuse", new Vector3(2.0f, 0.0f, 0.0f));
-        _defaultShader.SetFloat("spotLight.constant", 1.0f);
-        _defaultShader.SetFloat("spotLight.cutOff", MathHelper.DegreesToRadians(55));
-        _defaultShader.SetFloat("spotLight.outerCutOff", MathHelper.DegreesToRadians(50));
-        _defaultShader.SetFloat("spotLight.linear", 0.09f);
-        _defaultShader.SetFloat("spotLight.quadratic", 0.002f);
 
-        GL.BindVertexArray(_vao);
-        model = Matrix4.Identity;
-        model *= Matrix4.CreateScale(0.25f);
-        model *= Matrix4.CreateTranslation(_spotLightPos);
+        for (var i = 0; i < 2; i++)
+        {
+            var spotLight = _spotLights[i];
+            
+            _defaultShader.SetVector3( $"spotLight[{i}].position", spotLight.Position);
+            _defaultShader.SetVector3($"spotLight[{i}].direction", spotLight.Direction);
+            _defaultShader.SetVector3($"spotLight[{i}].diffuse", spotLight.Color);
+            _defaultShader.SetFloat($"spotLight[{i}].constant", 1.0f);
+            _defaultShader.SetFloat($"spotLight[{i}].cutOff", MathHelper.DegreesToRadians(55));
+            _defaultShader.SetFloat($"spotLight[{i}].outerCutOff", MathHelper.DegreesToRadians(50));
+            _defaultShader.SetFloat($"spotLight[{i}].linear", 0.09f);
+            _defaultShader.SetFloat($"spotLight[{i}].quadratic", 0.002f);
 
-        _lightCubeShader.SetMatrix4("model", model);
-        _lightCubeShader.SetVector3("color", new Vector3(1.0f, 0, 0));
-        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+            GL.BindVertexArray(_vao);
+            model = Matrix4.Identity;
+            model *= Matrix4.CreateScale(0.25f);
+            model *= Matrix4.CreateTranslation(spotLight.Position);
+
+            _lightCubeShader.SetMatrix4("model", model);
+            _lightCubeShader.SetVector3("color", spotLight.Color);
+            GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+        }
         
         GL.Disable(EnableCap.CullFace);
 
@@ -295,36 +310,6 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         if (window.CursorState == CursorState.Grabbed)
         {
             _camera.Update(e.Time);
-        }
-
-        if (window.KeyboardState.IsKeyDown(Keys.T))
-        {
-            _spotLightPos.Y += 0.01f;
-        }
-        
-        if (window.KeyboardState.IsKeyDown(Keys.G))
-        {
-            _spotLightPos.Y -= 0.01f;
-        }
-        
-        if (window.KeyboardState.IsKeyDown(Keys.Left))
-        {
-            _spotLightPos.X -= 0.01f;
-        }
-        
-        if (window.KeyboardState.IsKeyDown(Keys.Right))
-        {
-            _spotLightPos.X += 0.01f;
-        }
-        
-        if (window.KeyboardState.IsKeyDown(Keys.Up))
-        {
-            _spotLightPos.Z -= 0.01f;
-        }
-        
-        if (window.KeyboardState.IsKeyDown(Keys.Down))
-        {
-            _spotLightPos.Z += 0.01f;
         }
 
         base.OnUpdate(e);
