@@ -68,4 +68,9 @@ public class Skybox
         GL.ActiveTexture(TextureUnit.Texture0);
         GL.BindTexture(TextureTarget.TextureCubeMap, Id);
     }
+
+    public void Dispose()
+    {
+        GL.DeleteTexture(Id);
+    }
 }

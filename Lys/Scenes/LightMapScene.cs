@@ -277,13 +277,13 @@ public class LightMapScene(NativeWindow window, string title = "Default Scene") 
         _lightingShader.Dispose();
         _lightCubeShader.Dispose();
 
-        GL.DeleteTexture(_container.Id);
-        GL.DeleteTexture(_containerSpecular.Id);
-        GL.DeleteTexture(_containerSpecularColor.Id);
-        GL.DeleteTexture(_pinkColorSpecular.Id);
-        GL.DeleteTexture(_emissionMap.Id);
+        _container.Dispose();
+        _containerSpecular.Dispose();
+        _containerSpecularColor.Dispose();
+        _pinkColorSpecular.Dispose();
+        _emissionMap.Dispose();
 
-        GL.DeleteTexture(_redSpaceSkybox.Id);
+        _redSpaceSkybox.Dispose();
 
         AudioManager.Cleanup();
         _source.Delete();

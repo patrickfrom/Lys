@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using Lys.Lights;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -7,23 +8,9 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Lys.Scenes;
 
-public struct PointLight(Vector3 position, Vector3 color, float constant = 1.0f)
-{
-    public Vector3 Position = position;
-    public Vector3 Color = color;
-    public float Constant = constant;
-}
-
-public struct SpotLight(Vector3 position, Vector3 direction, Vector3 color)
-{
-    public Vector3 Position = position;
-    public Vector3 Direction = direction;
-    public Vector3 Color = color;
-}
-
 public class LightCasterScene(NativeWindow window, string title = "Default Scene") : Scene(window, title)
 {
-    private float[] _vertices =
+    private readonly float[] _vertices =
     {
         -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
         0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
@@ -56,7 +43,7 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
     };
 
-    private int[] _indices =
+    private readonly int[] _indices =
     {
         0, 3, 1,
         3, 2, 1,
@@ -86,21 +73,19 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
     private int _vao;
     private int _vbo;
     private int _ebo;
-
-    private int _lightVao;
-    private Vector3 _lightPos = new(2, -3, 2);
+    
     private Texture2D _container;
     private Texture2D _containerSpecular;
     private Vector3 _lightColor = new(1.0f, 1.0f, 1.0f);
 
-    private PointLight[] _pointLights =
+    private readonly PointLight[] _pointLights =
     {
         new(new Vector3(-2,-1,0), new Vector3(1,0,0), 0.1f),
         new(new Vector3(0,-1,0), new Vector3(0,1,0), 0.05f),
         new(new Vector3(0,0,3), new Vector3(0,1,1), 0.1f),
     };
 
-    private SpotLight[] _spotLights =
+    private readonly SpotLight[] _spotLights =
     {
         new(new Vector3(1, 3, 3), new Vector3(0, -1, 0), new Vector3(1,0,0)),
         new(new Vector3(0, 1f, 0), new Vector3(0, -1, 0), new Vector3(1,1,1)),
@@ -139,16 +124,7 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
 
         GL.EnableVertexAttribArray(2);
         GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 6 * sizeof(float));
-
-        _lightVao = GL.GenVertexArray();
-        GL.BindVertexArray(_lightVao);
-
-        GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
-
-        GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
-
+        
         _skyboxVao = GL.GenVertexArray();
         GL.BindVertexArray(_skyboxVao);
 
@@ -318,5 +294,20 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
     public override void OnUnload()
     {
         base.OnUnload();
+        
+        GL.DeleteVertexArray(_vao);
+        GL.DeleteVertexArray(_skyboxVao);
+        
+        GL.DeleteBuffer(_vbo);
+        GL.DeleteBuffer(_ebo);
+        GL.DeleteBuffer(_skyboxVbo);
+        
+        _defaultShader.Dispose();
+        _skyboxShader.Dispose();
+        _lightCubeShader.Dispose();
+        
+        _container.Dispose();
+        _containerSpecular.Dispose();
+        _redSpaceSkybox.Dispose();
     }
 }

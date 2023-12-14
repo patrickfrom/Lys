@@ -40,4 +40,9 @@ public class Texture2D
         GL.ActiveTexture(TextureUnit.Texture0+textureUnit);
         GL.BindTexture(TextureTarget.Texture2D, Id);
     }
+
+    public void Dispose()
+    {
+        GL.DeleteTexture(Id);
+    }
 }
