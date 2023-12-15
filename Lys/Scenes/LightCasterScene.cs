@@ -89,6 +89,7 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
     {
         new(new Vector3(1, 3, 3), new Vector3(0, -1, 0), new Vector3(1,0,0)),
         new(new Vector3(0, 1f, 0), new Vector3(0, -1, 0), new Vector3(1,1,1)),
+        new(new Vector3(-1.9f, 1f, -1f), new Vector3(0, -1, 0), new Vector3(0.0f,1.0f,1.0f)),
     };
 
     private Skybox _redSpaceSkybox;
@@ -207,7 +208,7 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
         _defaultShader.SetVector3("directionalLight.diffuse", diffuseColor);
         _defaultShader.SetVector3("directionalLight.specular", new Vector3(1.0f, 1.0f, 1.0f));
 
-        for (var i = 0; i < 3; i++)
+        for (var i = 0; i < _pointLights.Length; i++)
         {
             var pointLight = _pointLights[i];
             _defaultShader.SetVector3($"pointLight[{i}].position", pointLight.Position);
@@ -226,16 +227,16 @@ public class LightCasterScene(NativeWindow window, string title = "Default Scene
             GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         }
 
-        for (var i = 0; i < 2; i++)
+        for (var i = 0; i < _spotLights.Length; i++)
         {
             var spotLight = _spotLights[i];
             
             _defaultShader.SetVector3( $"spotLight[{i}].position", spotLight.Position);
             _defaultShader.SetVector3($"spotLight[{i}].direction", spotLight.Direction);
             _defaultShader.SetVector3($"spotLight[{i}].diffuse", spotLight.Color);
-            _defaultShader.SetFloat($"spotLight[{i}].constant", 1.0f);
+            _defaultShader.SetFloat($"spotLight[{i}].constant", 0.5f);
             _defaultShader.SetFloat($"spotLight[{i}].cutOff", MathHelper.DegreesToRadians(55));
-            _defaultShader.SetFloat($"spotLight[{i}].outerCutOff", MathHelper.DegreesToRadians(50));
+            _defaultShader.SetFloat($"spotLight[{i}].outerCutOff", MathHelper.DegreesToRadians(45));
             _defaultShader.SetFloat($"spotLight[{i}].linear", 0.09f);
             _defaultShader.SetFloat($"spotLight[{i}].quadratic", 0.002f);
 
