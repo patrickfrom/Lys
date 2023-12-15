@@ -90,12 +90,13 @@ public class Cube
         GL.BindVertexArray(0);
     }
 
-    public void Draw(Shader shader, Vector3 position = default)
+    public void Draw(Shader shader, Vector3 position = default, float scale = 1.0f, float angle = 0)
     {
         GL.BindVertexArray(_vao);
         
         var model = Matrix4.Identity;
-        model *= Matrix4.CreateScale(1.0f);
+        model *= Matrix4.CreateScale(scale);
+        model *= Matrix4.CreateFromAxisAngle(new Vector3(1, 1, 1), angle);
         model *= Matrix4.CreateTranslation(position);
         
         shader.SetMatrix4("model", model);

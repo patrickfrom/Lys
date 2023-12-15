@@ -15,6 +15,9 @@ public class LightingScene(NativeWindow window, string title = "Default Scene") 
 
     private Shader _shader;
     
+    private Texture2D _container;
+    private Texture2D _containerSpecular;
+    
     public override void OnLoad()
     {
         base.OnLoad();
@@ -24,19 +27,38 @@ public class LightingScene(NativeWindow window, string title = "Default Scene") 
         _camera = new Camera(Vector3.UnitZ * 3, window.ClientSize.X / (float)window.ClientSize.Y, window.KeyboardState,
             window.MouseState);
 
+
+        _shader = new Shader("Assets/Shaders/LightingScene/default.vert", "Assets/Shaders/LightingScene/default.frag");
+       
+        _container = new Texture2D("Assets/Textures/container2.png");
+        _containerSpecular = new Texture2D("Assets/Textures/container2_specular.png");
+
+        _shader.SetInt("material.diffuse", 0);
+        //_shader.SetInt("material.specular", 1);
+        
         window.CursorState = CursorState.Grabbed;
         
-        _shader = new Shader("Assets/Shaders/LightingScene/default.vert", "Assets/Shaders/LightingScene/default.frag");
+        GL.Enable(EnableCap.DepthTest);
+        
+        GL.Enable(EnableCap.CullFace);
+        GL.CullFace(CullFaceMode.Back);
     }
 
     public override void OnRender(FrameEventArgs e)
     {
         base.OnRender(e);
-        GL.Clear(ClearBufferMask.ColorBufferBit);
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         
         _shader.SetMatrix4("view", _camera.GetViewMatrix());
         _shader.SetMatrix4("projection", _camera.GetProjectionMatrix());
+        
+        _container.Use();
         _cube.Draw(_shader);
+        
+        _container.Use();
+        _cube.Draw(_shader, new Vector3(2, 1, 2));
+        
+        GL.BindTexture(TextureTarget.Texture2D, 0);
     }
 
     public override void OnUpdate(FrameEventArgs e)
