@@ -4,11 +4,17 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Lys.Scenes;
 
-public abstract class Scene(NativeWindow window, string title = "Default Scene")
+public abstract class Scene(NativeWindow window)
 {
+    protected virtual string Title => "Default Scene";
+
+    public KeyboardState KeyboardState { get; set; } = window.KeyboardState;
+    public WindowState WindowState { get; set; } = window.WindowState;
+    public MouseState MouseState { get; set; } = window.MouseState;
+    
     public virtual void OnLoad()
     {
-        window.Title = title;
+        window.Title = Title;
     }
 
     public virtual void OnRender(FrameEventArgs e)
@@ -19,12 +25,12 @@ public abstract class Scene(NativeWindow window, string title = "Default Scene")
     {
         if (window.KeyboardState.IsKeyPressed(Keys.F11))
         {
-            window.WindowState = window.WindowState != WindowState.Fullscreen
+            WindowState = WindowState != WindowState.Fullscreen
                 ? WindowState.Fullscreen
                 : WindowState.Normal;
         }
 
-        if (window.KeyboardState.IsKeyDown(Keys.Escape))
+        if (KeyboardState.IsKeyDown(Keys.Escape))
         {
             window.Close();
         }

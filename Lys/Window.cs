@@ -22,6 +22,8 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     protected override void OnLoad()
     {
         GlDebugger.Init();
+
+        _currentScene = new LysScene(this);
         
         _currentScene.OnLoad();
     }
