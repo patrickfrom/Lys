@@ -2,9 +2,9 @@
 
 namespace Lys;
 
-public struct Vertex(Vector3 position, Vector3 normals, Vector2 texCoords)
+public struct Vertex(Vector3 position, Vector3 normal, Vector2 texCoords)
 {
     public Vector3 Position = position;
-    public Vector3 Normals = normals;
+    public Vector3 Normal = normal;
     public Vector2 TexCoords = texCoords;
 }
