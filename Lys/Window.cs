@@ -79,6 +79,12 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     private int _vao;
     private int _vbo;
     private int _ebo;
+    
+    private Shader _skyboxShader;
+    private Skybox _skybox;
+    
+    private int _skyboxVao;
+    private int _skyboxVbo;
 
     private Camera _camera;
 
@@ -114,14 +120,41 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
             Marshal.OffsetOf<Vertex>("TexCoords"));
 
         _shader = new Shader("Assets/Shaders/default.vert", "Assets/Shaders/default.frag");
+        _skyboxShader = new Shader("Assets/Shaders/skybox.vert", "Assets/Shaders/skybox.frag");
         
         _camera = new Camera(Vector3.UnitZ * 3, ClientSize.X / (float)ClientSize.Y, KeyboardState,
             MouseState);
 
         CursorState = CursorState.Grabbed;
+        
+        _skyboxVao = GL.GenVertexArray();
+        GL.BindVertexArray(_skyboxVao);
+
+        _skyboxVbo = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ArrayBuffer, _skyboxVbo);
+        GL.BufferData(BufferTarget.ArrayBuffer, Skybox.SkyboxVertices.Length * sizeof(float), Skybox.SkyboxVertices,
+            BufferUsageHint.StaticDraw);
+
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
+        
+        GL.EnableVertexAttribArray(0);
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+        
+        var skyboxPaths = new[]
+        {
+            "Assets/Skybox/right.jpg",
+            "Assets/Skybox/left.jpg",
+            "Assets/Skybox/top.jpg",
+            "Assets/Skybox/bottom.jpg",
+            "Assets/Skybox/front.jpg",
+            "Assets/Skybox/back.jpg",
+        };
+
+        _skybox = new Skybox(skyboxPaths);
+        _skyboxShader.SetInt("skybox", 0);
 
         GL.Enable(EnableCap.DepthTest);
-        GL.Enable(EnableCap.CullFace);
+        
         GL.CullFace(CullFaceMode.Back);
     }
 
@@ -131,15 +164,19 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         _shader.SetMatrix4("view", _camera.GetViewMatrix());
         _shader.SetMatrix4("projection", _camera.GetProjectionMatrix());
-
+        
+        
         GL.BindVertexArray(_vao);
 
         var model = Matrix4.Identity;
+        model *= Matrix4.CreateScale(1.0f);
         model *= Matrix4.CreateTranslation(0, 0, 0);
 
         _shader.SetMatrix4("model", model);
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
+        ShowSkybox();
+        
         _controller.Update(this, (float)e.Time);
 
         _controller.Render();
@@ -170,5 +207,18 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     {
         base.OnMouseWheel(e);
         _controller.MouseScroll(e.Offset);
+    }
+
+    private void ShowSkybox()
+    {
+        GL.Disable(EnableCap.CullFace);
+        GL.DepthFunc(DepthFunction.Lequal);
+        _skyboxShader.SetMatrix4("view", new Matrix4(new Matrix3(_camera.GetViewMatrix())));
+        _skyboxShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
+        GL.BindVertexArray(_skyboxVao);
+        _skybox.Use();
+        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+        GL.DepthFunc(DepthFunction.Less);
+        GL.Enable(EnableCap.CullFace);
     }
 }
