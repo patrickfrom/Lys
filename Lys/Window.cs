@@ -22,10 +22,6 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     protected override void OnLoad()
     {
         GlDebugger.Init();
-        // Later add switching between scenes (remember to unload on changing scene)
-        //_currentScene = new LightMapScene(this, "Light Maps");
-        //_currentScene = new LightCasterScene(this, "Light Caster");
-        _currentScene = new LightingScene(this, title);
         
         _currentScene.OnLoad();
     }
