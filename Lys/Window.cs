@@ -142,12 +142,12 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         
         var skyboxPaths = new[]
         {
-            "Assets/Skybox/right.jpg",
-            "Assets/Skybox/left.jpg",
-            "Assets/Skybox/top.jpg",
-            "Assets/Skybox/bottom.jpg",
-            "Assets/Skybox/front.jpg",
-            "Assets/Skybox/back.jpg",
+            "Assets/Skybox/Calm/px.png",
+            "Assets/Skybox/Calm/nx.png",
+            "Assets/Skybox/Calm/py.png",
+            "Assets/Skybox/Calm/ny.png",
+            "Assets/Skybox/Calm/pz.png",
+            "Assets/Skybox/Calm/nz.png",
         };
 
         _skybox = new Skybox(skyboxPaths);
