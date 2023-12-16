@@ -8,9 +8,18 @@ public abstract class Scene(NativeWindow window)
 {
     protected virtual string Title => "Default Scene";
 
+    public WindowState WindowState
+    {
+        get => window.WindowState;
+        set => window.WindowState = value;
+    }
+    
     public KeyboardState KeyboardState { get; set; } = window.KeyboardState;
-    public WindowState WindowState { get; set; } = window.WindowState;
     public MouseState MouseState { get; set; } = window.MouseState;
+    public CursorState CursorState {
+        get => window.CursorState;
+        set => window.CursorState = value;
+    }
     
     public virtual void OnLoad()
     {
@@ -23,7 +32,7 @@ public abstract class Scene(NativeWindow window)
 
     public virtual void OnUpdate(FrameEventArgs e)
     {
-        if (window.KeyboardState.IsKeyPressed(Keys.F11))
+        if (KeyboardState.IsKeyPressed(Keys.F11))
         {
             WindowState = WindowState != WindowState.Fullscreen
                 ? WindowState.Fullscreen
