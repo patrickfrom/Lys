@@ -1,6 +1,5 @@
-using System.Runtime.InteropServices;
-using System.Text;
-using Lys.Scenes;
+using System.Drawing;
+using ImGuiNET;
 using Lys.Utils;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
@@ -17,35 +16,49 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     })
 {
 
-    private Scene _currentScene;
+    private ImGuiController _controller;
     
     protected override void OnLoad()
     {
         GlDebugger.Init();
-
-        _currentScene = new LysScene(this);
+        GL.ClearColor(Color.Navy);
         
-        _currentScene.OnLoad();
+        _controller = new ImGuiController(ClientSize.X, ClientSize.Y);
     }
 
     protected override void OnRenderFrame(FrameEventArgs e)
     {
-        _currentScene.OnRender(e);        
+        GL.Clear(ClearBufferMask.ColorBufferBit);
+        
+        _controller.Update(this, (float)e.Time);
+
+        ImGui.DockSpaceOverViewport();
+        ImGui.ShowDemoWindow();
+        
+        _controller.Render();
         SwapBuffers();
     }
 
     protected override void OnUpdateFrame(FrameEventArgs e)
     {
-        _currentScene.OnUpdate(e);
+
     }
 
     protected override void OnResize(ResizeEventArgs e)
     {
         GL.Viewport(0, 0, ClientSize.X, ClientSize.Y);
+        _controller.WindowResized(ClientSize.X, ClientSize.Y);
+    }
+    
+    protected override void OnTextInput(TextInputEventArgs e)
+    {
+        base.OnTextInput(e);
+        _controller.PressChar((char)e.Unicode);
     }
 
-    protected override void OnUnload()
+    protected override void OnMouseWheel(MouseWheelEventArgs e)
     {
-        _currentScene.OnUnload();
+        base.OnMouseWheel(e);
+        _controller.MouseScroll(e.Offset);
     }
 }
