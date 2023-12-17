@@ -166,6 +166,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         _shader.SetMatrix4("view", _camera.GetViewMatrix());
         _shader.SetMatrix4("projection", _camera.GetProjectionMatrix());
+        _shader.SetVector3("viewPos", _camera.Position);
         
         
         GL.BindVertexArray(_vao);
@@ -246,5 +247,12 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         ImGui.End();
 
         _controller.Render();
+    }
+
+    protected override void OnUnload()
+    {
+        base.OnUnload();
+        
+        _shader.Dispose();
     }
 }
