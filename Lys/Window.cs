@@ -87,6 +87,8 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     private int _skyboxVbo;
 
     private Camera _camera;
+    
+    private Vector3 _cubePos;
 
     protected override void OnLoad()
     {
@@ -170,25 +172,38 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         var model = Matrix4.Identity;
         model *= Matrix4.CreateScale(1.0f);
-        model *= Matrix4.CreateTranslation(0, 0, 0);
+        model *= Matrix4.CreateTranslation(_cubePos);
 
         _shader.SetMatrix4("model", model);
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
         ShowSkybox();
-        
-        _controller.Update(this, (float)e.Time);
 
-        _controller.Render();
+        RenderUi((float)e.Time);
+        
         SwapBuffers();
     }
 
     protected override void OnUpdateFrame(FrameEventArgs e)
     {
+        if (KeyboardState.IsKeyPressed(Keys.F))
+        {
+            CursorState = CursorState == CursorState.Grabbed ? CursorState.Normal : CursorState.Grabbed;
+        }
+        
         if (KeyboardState.IsKeyDown(Keys.Escape))
             Close();
         
-        _camera.Update(e.Time);
+        if (KeyboardState.IsKeyPressed(Keys.F11))
+        {
+            WindowState = WindowState != WindowState.Fullscreen
+                ? WindowState.Fullscreen
+                : WindowState.Normal;
+        }
+        
+
+        if(CursorState == CursorState.Grabbed)
+            _camera.Update(e.Time);
     }
 
     protected override void OnResize(ResizeEventArgs e)
@@ -220,5 +235,16 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         GL.DepthFunc(DepthFunction.Less);
         GL.Enable(EnableCap.CullFace);
+    }
+    
+    private void RenderUi(float time)
+    {
+        _controller.Update(this, time);
+
+        ImGui.Begin("Cube Pos");
+        ImGuiExtensions.DragFloat3("Position", ref _cubePos, 0.01f);
+        ImGui.End();
+
+        _controller.Render();
     }
 }
