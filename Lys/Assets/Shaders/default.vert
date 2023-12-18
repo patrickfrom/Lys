@@ -14,8 +14,6 @@ layout (std140, binding = 0) uniform Matrices {
 };
 
 uniform mat4 model;
-/*uniform mat4 projection;
-uniform mat4 view;*/
 
 void main() {
     gl_Position = vec4(aPosition, 1.0) * model * view * projection;

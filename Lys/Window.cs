@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using ImGuiNET;
@@ -16,7 +17,8 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     {
         ClientSize = new Vector2i(width, height),
         Title = title,
-        APIVersion = new Version(4, 4, 0)
+        APIVersion = new Version(4, 4, 0),
+        NumberOfSamples = 4
     })
 {
     private ImGuiController _controller;
@@ -93,12 +95,13 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     private float _cubeScale = 1.0f;
     private Vector3 _cubeRotation;
     private int _uboMatrices;
+    private Texture2D _containerTexture;
 
     protected override void OnLoad()
     {
         GlDebugger.Init();
         GL.ClearColor(Color.Navy);
-
+        
         _controller = new ImGuiController(ClientSize.X, ClientSize.Y);
 
         _vao = GL.GenVertexArray();
@@ -158,8 +161,13 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         _skybox = new Skybox(skyboxPaths);
         _skyboxShader.SetInt("skybox", 0);
+
+        _containerTexture = new Texture2D("Assets/Textures/container2.png");
+        _shader.SetInt("diffuse", 0);
         
         GL.Enable(EnableCap.DepthTest);
+        GL.Enable(EnableCap.Multisample);
+        GL.Enable(EnableCap.FramebufferSrgb);
         
         GL.CullFace(CullFaceMode.Back);
         
@@ -183,7 +191,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         GL.BufferSubData(BufferTarget.UniformBuffer, Unsafe.SizeOf<Matrix4>(), Unsafe.SizeOf<Matrix4>(), ref view);
         GL.BindBuffer(BufferTarget.UniformBuffer, 0);
         
-        _shader.SetVector3("viewPos", _camera.Position);
+        //_shader.SetVector3("viewPos", _camera.Position);
 
         GL.BindVertexArray(_vao);
 
@@ -193,7 +201,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         model *= Matrix4.CreateRotationY(MathHelper.DegreesToRadians(_cubeRotation.Y));
         model *= Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(_cubeRotation.Z));
         model *= Matrix4.CreateTranslation(_cubePos);
-
+        _containerTexture.Use();
         _shader.SetMatrix4("model", model);
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         
@@ -265,6 +273,8 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         ImGuiExtensions.DragFloat3("Rotation", ref _cubeRotation, 0.1f);
         ImGui.DragFloat("Scale", ref _cubeScale, 0.01f);
         ImGui.End();
+
+        Title = $"FPS {ImGui.GetIO().Framerate}";
 
         _controller.Render();
     }

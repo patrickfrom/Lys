@@ -6,9 +6,6 @@ layout (std140, binding = 0) uniform Matrices {
     mat4 view;
 };
 
-/*uniform mat4 projection;
-uniform mat4 view;*/
-
 out vec3 TexCoords;
 
 void main() {

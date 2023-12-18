@@ -7,8 +7,8 @@ in vec2 TexCoords;
 in vec3 FragPos;
 
 uniform vec3 viewPos;
+uniform sampler2D diffuse;
 
 void main() {
-    vec3 result = vec3(TexCoords, 0.0) * dot(normalize(Normal), viewPos - FragPos);
-    FragColor = vec4(result, 1.0);
+    FragColor = texture(diffuse, TexCoords);
 }
