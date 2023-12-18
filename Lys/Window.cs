@@ -15,7 +15,8 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     new NativeWindowSettings
     {
         ClientSize = new Vector2i(width, height),
-        Title = title
+        Title = title,
+        APIVersion = new Version(4, 4, 0)
     })
 {
     private ImGuiController _controller;
@@ -75,7 +76,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     };
 
     private Shader _shader;
-
+    
     private int _vao;
     private int _vbo;
     private int _ebo;
@@ -89,6 +90,9 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     private Camera _camera;
     
     private Vector3 _cubePos;
+    private float _cubeScale = 1.0f;
+    private Vector3 _cubeRotation;
+    private int _uboMatrices;
 
     protected override void OnLoad()
     {
@@ -154,30 +158,45 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         _skybox = new Skybox(skyboxPaths);
         _skyboxShader.SetInt("skybox", 0);
-
+        
         GL.Enable(EnableCap.DepthTest);
         
         GL.CullFace(CullFaceMode.Back);
+        
+        _uboMatrices = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.UniformBuffer, _uboMatrices);
+        GL.BufferData(BufferTarget.UniformBuffer, 2 * Unsafe.SizeOf<Matrix4>(), IntPtr.Zero, BufferUsageHint.StaticDraw);
+        GL.BindBuffer(BufferTarget.UniformBuffer, 0);
+        
+        GL.BindBufferRange(BufferRangeTarget.UniformBuffer, 0, _uboMatrices, 0, 2 * Unsafe.SizeOf<Matrix4>());
     }
 
     protected override void OnRenderFrame(FrameEventArgs e)
     {
-        GL.Clear(ClearBufferMask.ColorBufferBit |ClearBufferMask.DepthBufferBit);
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-        _shader.SetMatrix4("view", _camera.GetViewMatrix());
-        _shader.SetMatrix4("projection", _camera.GetProjectionMatrix());
+        var view = Matrix4.Transpose(_camera.GetViewMatrix());
+        var projection = Matrix4.Transpose(_camera.GetProjectionMatrix());
+        
+        GL.BindBuffer(BufferTarget.UniformBuffer, _uboMatrices);
+        GL.BufferSubData(BufferTarget.UniformBuffer, 0, Unsafe.SizeOf<Matrix4>(), ref projection);
+        GL.BufferSubData(BufferTarget.UniformBuffer, Unsafe.SizeOf<Matrix4>(), Unsafe.SizeOf<Matrix4>(), ref view);
+        GL.BindBuffer(BufferTarget.UniformBuffer, 0);
+        
         _shader.SetVector3("viewPos", _camera.Position);
-        
-        
+
         GL.BindVertexArray(_vao);
 
         var model = Matrix4.Identity;
-        model *= Matrix4.CreateScale(1.0f);
+        model *= Matrix4.CreateScale(_cubeScale);
+        model *= Matrix4.CreateRotationX(MathHelper.DegreesToRadians(_cubeRotation.X));
+        model *= Matrix4.CreateRotationY(MathHelper.DegreesToRadians(_cubeRotation.Y));
+        model *= Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(_cubeRotation.Z));
         model *= Matrix4.CreateTranslation(_cubePos);
 
         _shader.SetMatrix4("model", model);
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
-
+        
         ShowSkybox();
 
         RenderUi((float)e.Time);
@@ -229,8 +248,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     {
         GL.Disable(EnableCap.CullFace);
         GL.DepthFunc(DepthFunction.Lequal);
-        _skyboxShader.SetMatrix4("view", new Matrix4(new Matrix3(_camera.GetViewMatrix())));
-        _skyboxShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
+        _skyboxShader.Use();
         GL.BindVertexArray(_skyboxVao);
         _skybox.Use();
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
@@ -244,6 +262,8 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         ImGui.Begin("Cube Pos");
         ImGuiExtensions.DragFloat3("Position", ref _cubePos, 0.01f);
+        ImGuiExtensions.DragFloat3("Rotation", ref _cubeRotation, 0.1f);
+        ImGui.DragFloat("Scale", ref _cubeScale, 0.01f);
         ImGui.End();
 
         _controller.Render();
