@@ -103,8 +103,12 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     private Texture2D _walnutSpecular;
 
     private DirectionalLight _directionalLight = new(
-        new Vector3(-0.090f, -0.340f, 0.320f)
+        new Vector3(-0.090f, -0.340f, 0.320f),
+        ambient: new Vector3(0.5f)
     );
+
+    private PointLight _pointLight = new(new Vector3(0, -1, 0), diffuse: new Vector3(1,0,0), ambient: new Vector3(0.5f));
+    private SpotLight _spotLight = new(new Vector3(0, 1, 0), new Vector3(0, -1, 0), diffuse: new Vector3(0,1,0), ambient: new Vector3(0.0f));
 
     protected override void OnLoad()
     {
@@ -205,10 +209,32 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         _shader.SetVector3("viewPos", _camera.Position);
 
+        // Directional Light
         _shader.SetVector3("directionalLight.direction", _directionalLight.Direction);
         _shader.SetVector3("directionalLight.ambient", _directionalLight.Ambient);
         _shader.SetVector3("directionalLight.diffuse", _directionalLight.Diffuse);
         _shader.SetVector3("directionalLight.specular", _directionalLight.Specular);
+        
+        // Point Light
+        _shader.SetVector3("pointLight.position", _pointLight.Position);
+        _shader.SetFloat("pointLight.constant", _pointLight.Constant);
+        _shader.SetFloat("pointLight.linear", _pointLight.Linear);
+        _shader.SetFloat("pointLight.quadratic", _pointLight.Quadratic);
+        _shader.SetVector3("pointLight.ambient", _pointLight.Ambient);
+        _shader.SetVector3("pointLight.diffuse", _pointLight.Diffuse);
+        _shader.SetVector3("pointLight.specular", _pointLight.Specular);     
+        
+        // Spot Light
+        _shader.SetVector3("spotLight.position", _spotLight.Position);
+        _shader.SetVector3("spotLight.direction", _spotLight.Direction);
+        _shader.SetFloat("spotLight.constant", _spotLight.Constant);
+        _shader.SetFloat("spotLight.linear", _spotLight.Linear);
+        _shader.SetFloat("spotLight.quadratic", _spotLight.Quadratic);
+        _shader.SetFloat("spotLight.cutOff", (float)Math.Cos(MathHelper.DegreesToRadians(_spotLight.CutOff)));
+        _shader.SetFloat("spotLight.outerCutOff", (float)Math.Cos(MathHelper.DegreesToRadians(_spotLight.OuterCutOff)));
+        _shader.SetVector3("spotLight.ambient", _spotLight.Ambient);
+        _shader.SetVector3("spotLight.diffuse", _spotLight.Diffuse);
+        _shader.SetVector3("spotLight.specular", _spotLight.Specular);
 
         GL.BindVertexArray(_vao);
 
@@ -297,6 +323,17 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         ImGui.Begin("Directional Light");
         ImGuiExtensions.DragFloat3("Direction", ref _directionalLight.Direction, 0.01f);
+        ImGui.End();
+
+        ImGui.Begin("Spotlight");
+        ImGuiExtensions.DragFloat3("Position", ref _spotLight.Position, 0.01f);
+        ImGuiExtensions.DragFloat3("Direction", ref _spotLight.Direction, 0.01f);
+        ImGuiExtensions.ColorEdit3("Color", ref _spotLight.Diffuse);
+        ImGui.DragFloat("Constant", ref _spotLight.Constant, 0.01f);
+        ImGui.DragFloat("Linear", ref _spotLight.Linear, 0.01f);
+        ImGui.DragFloat("Quadratic", ref _spotLight.Quadratic, 0.01f);
+        ImGui.DragFloat("cutOff", ref _spotLight.CutOff, 0.01f);
+        ImGui.DragFloat("outerCutOff", ref _spotLight.OuterCutOff, 0.01f);
         ImGui.End();
 
         Title = $"FPS {ImGui.GetIO().Framerate}";

@@ -8,8 +8,8 @@ public struct SpotLight(
     float constant = 1.0f,
     float linear = 0.09f,
     float quadratic = 0.032f,
-    float cutoffDegrees = 12.5f,
-    float outerCutOffDegrees = 15.0f,
+    float cutOff = 12.5f,
+    float outerCutOff = 15.0f,
     Vector3 ambient = default,
     Vector3 diffuse = default,
     Vector3 specular = default
@@ -22,17 +22,8 @@ public struct SpotLight(
     public float Linear = linear;
     public float Quadratic = quadratic;
 
-    public float CutOff
-    {
-        get => MathHelper.DegreesToRadians(cutoffDegrees);
-        set => cutoffDegrees = value;
-    }
-    
-    public float OuterCutOff
-    {
-        get => MathHelper.DegreesToRadians(outerCutOffDegrees);
-        set => outerCutOffDegrees = value;
-    }
+    public float CutOff = cutOff;
+    public float OuterCutOff = outerCutOff;
 
     public Vector3 Ambient = ambient != default ? ambient : new Vector3(1.0f);
     public Vector3 Diffuse = diffuse != default ? diffuse : new Vector3(1.0f);
