@@ -135,11 +135,11 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         GL.EnableVertexAttribArray(1);
         GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(),
-            Marshal.OffsetOf<Vertex>("Normal"));
+            Marshal.OffsetOf<Vertex>(nameof(Vertex.Normal)));
 
         GL.EnableVertexAttribArray(2);
         GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(),
-            Marshal.OffsetOf<Vertex>("TexCoords"));
+            Marshal.OffsetOf<Vertex>(nameof(Vertex.TexCoords)));
 
         _shader = new Shader("Assets/Shaders/default.vert", "Assets/Shaders/default.frag");
         _skyboxShader = new Shader("Assets/Shaders/skybox.vert", "Assets/Shaders/skybox.frag");
