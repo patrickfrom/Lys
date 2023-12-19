@@ -103,17 +103,14 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     private Texture2D _walnutSpecular;
 
     private DirectionalLight _directionalLight = new(
-        new Vector3(-0.090f, -0.340f, 0.320f),
-        new Vector3(1, 1, 1),
-        new Vector3(1, 1, 1),
-        new Vector3(1, 1, 1)
+        new Vector3(-0.090f, -0.340f, 0.320f)
     );
 
     protected override void OnLoad()
     {
         GlDebugger.Init();
         GL.ClearColor(Color.Navy);
-
+        
         _controller = new ImGuiController(ClientSize.X, ClientSize.Y);
 
         _vao = GL.GenVertexArray();
