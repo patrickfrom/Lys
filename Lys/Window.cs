@@ -211,7 +211,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _shader.SetVector3("directionalLight.direction", _directionalLight.Direction);
         _shader.SetVector3("directionalLight.ambient", _directionalLight.Ambient);
         _shader.SetVector3("directionalLight.diffuse", _directionalLight.Diffuse);
-        _shader.SetVector3("directionalLight.specular", _directionalLight.Diffuse);
+        _shader.SetVector3("directionalLight.specular", _directionalLight.Specular);
 
         GL.BindVertexArray(_vao);
 
