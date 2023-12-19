@@ -108,14 +108,17 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         ambient: new Vector3(0.5f)
     );
 
-    private PointLight _pointLight = new(new Vector3(0, -1, 0), diffuse: new Vector3(1,0,0), ambient: new Vector3(0.5f));
-    private SpotLight _spotLight = new(new Vector3(0, 1, 0), new Vector3(0, -1, 0), diffuse: new Vector3(0,1,0), specular: new Vector3(0,1,0), ambient: new Vector3(0.0f));
+    private PointLight _pointLight =
+        new(new Vector3(2, 4, 2), diffuse: new Vector3(1, 0, 0), ambient: new Vector3(0.5f));
+
+    private SpotLight _spotLight = new(new Vector3(0, 1, 0), new Vector3(0, -1, 0), diffuse: new Vector3(0, 1, 0),
+        specular: new Vector3(0, 1, 0), ambient: new Vector3(0.0f));
 
     protected override void OnLoad()
     {
         GlDebugger.Init();
         GL.ClearColor(Color.Navy);
-        
+
         _controller = new ImGuiController(ClientSize.X, ClientSize.Y);
 
         _vao = GL.GenVertexArray();
@@ -216,7 +219,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _shader.SetVector3("directionalLight.ambient", _directionalLight.Ambient);
         _shader.SetVector3("directionalLight.diffuse", _directionalLight.Diffuse);
         _shader.SetVector3("directionalLight.specular", _directionalLight.Specular);
-        
+
         // Point Light
         _shader.SetVector3("pointLight.position", _pointLight.Position);
         _shader.SetFloat("pointLight.constant", _pointLight.Constant);
@@ -224,18 +227,18 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _shader.SetFloat("pointLight.quadratic", _pointLight.Quadratic);
         _shader.SetVector3("pointLight.ambient", _pointLight.Ambient);
         _shader.SetVector3("pointLight.diffuse", _pointLight.Diffuse);
-        _shader.SetVector3("pointLight.specular", _pointLight.Specular);     
-        
+        _shader.SetVector3("pointLight.specular", _pointLight.Specular);
+
         GL.BindVertexArray(_vao);
 
         var model = Matrix4.Identity;
         model *= Matrix4.CreateScale(0.5f);
         model *= Matrix4.CreateTranslation(_pointLight.Position);
-        
+
         _lightCubeShader.SetVector3("lightColor", _pointLight.Diffuse);
         _lightCubeShader.SetMatrix4("model", model);
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
-        
+
         // Spot Light
         _shader.SetVector3("spotLight.position", _spotLight.Position);
         _shader.SetVector3("spotLight.direction", _spotLight.Direction);
@@ -247,12 +250,12 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _shader.SetVector3("spotLight.ambient", _spotLight.Ambient);
         _shader.SetVector3("spotLight.diffuse", _spotLight.Diffuse);
         _shader.SetVector3("spotLight.specular", _spotLight.Specular);
-        
+
         GL.BindVertexArray(_vao);
         model = Matrix4.Identity;
         model *= Matrix4.CreateScale(0.5f);
         model *= Matrix4.CreateTranslation(_spotLight.Position);
-        
+
         _lightCubeShader.SetVector3("lightColor", _spotLight.Diffuse);
         _lightCubeShader.SetMatrix4("model", model);
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
@@ -269,8 +272,32 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _walnutDiffuse.Use();
         _walnutSpecular.Use(1);
         _shader.SetMatrix4("model", model);
+        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+        GL.BindTexture(TextureTarget.Texture2D, 0);
+
+        GL.BindVertexArray(_vao);
+
+        model = Matrix4.Identity;
+        model *= Matrix4.CreateScale(1.0f);
+        model *= Matrix4.CreateTranslation(new Vector3(1.0f, 2.0f, 1.0f));
+        _shader.SetFloat("material.shininess", 32.0f);
+        _walnutDiffuse.Use();
+        _walnutSpecular.Use(1);
         _shader.SetMatrix4("model", model);
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+        GL.BindTexture(TextureTarget.Texture2D, 0);
+
+        GL.BindVertexArray(_vao);
+
+        model = Matrix4.Identity;
+        model *= Matrix4.CreateScale(0.25f);
+        model *= Matrix4.CreateTranslation(new Vector3(1.0f, 0.5f, 1.0f));
+        _shader.SetFloat("material.shininess", 32.0f);
+        _walnutDiffuse.Use();
+        _walnutSpecular.Use(1);
+        _shader.SetMatrix4("model", model);
+        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+        GL.BindTexture(TextureTarget.Texture2D, 0);
 
         ShowSkybox();
 
@@ -335,39 +362,60 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     {
         _controller.Update(this, time);
 
-        ImGui.Begin("Cube");
-        ImGuiExtensions.DragFloat3("Position", ref _cubePos, 0.01f);
-        ImGuiExtensions.DragFloat3("Rotation", ref _cubeRotation, 0.1f);
-        ImGui.DragFloat("Scale", ref _cubeScale, 0.01f);
-        ImGui.DragFloat("Shininess", ref _cubeShininess, 0.01f);
+
+        ImGui.Begin("Editor");
+        if (ImGui.TreeNode("Cubes"))
+        {
+            if (ImGui.TreeNode("Cube 1"))
+            {
+                ImGuiExtensions.DragFloat3("Position", ref _cubePos, 0.01f);
+                ImGuiExtensions.DragFloat3("Rotation", ref _cubeRotation, 0.1f);
+                ImGui.DragFloat("Scale", ref _cubeScale, 0.01f);
+                ImGui.DragFloat("Shininess", ref _cubeShininess, 0.01f);
+                ImGui.TreePop();
+            }
+
+            ImGui.TreePop();
+        }
+
+        if (ImGui.TreeNode("Lights"))
+        {
+            if (ImGui.TreeNode("Directional Light"))
+            {
+                ImGuiExtensions.DragFloat3("Direction", ref _directionalLight.Direction, 0.01f);
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Point Light"))
+            {
+                ImGuiExtensions.DragFloat3("Position", ref _pointLight.Position, 0.01f);
+                ImGuiExtensions.ColorEdit3("Diffuse", ref _pointLight.Diffuse);
+                ImGuiExtensions.ColorEdit3("Specular", ref _pointLight.Specular);
+                ImGui.DragFloat("Constant", ref _pointLight.Constant, 0.01f);
+                ImGui.DragFloat("Linear", ref _pointLight.Linear, 0.01f);
+                ImGui.DragFloat("Quadratic", ref _pointLight.Quadratic, 0.01f);
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Spotlight"))
+            {
+                ImGuiExtensions.DragFloat3("Position", ref _spotLight.Position, 0.01f);
+                ImGuiExtensions.DragFloat3("Direction", ref _spotLight.Direction, 0.01f);
+                ImGuiExtensions.ColorEdit3("Diffuse", ref _spotLight.Diffuse);
+                ImGuiExtensions.ColorEdit3("Specular", ref _spotLight.Specular);
+                ImGui.DragFloat("Constant", ref _spotLight.Constant, 0.01f);
+                ImGui.DragFloat("Linear", ref _spotLight.Linear, 0.01f);
+                ImGui.DragFloat("Quadratic", ref _spotLight.Quadratic, 0.01f);
+                ImGui.DragFloat("cutOff", ref _spotLight.CutOff, 0.01f);
+                ImGui.DragFloat("outerCutOff", ref _spotLight.OuterCutOff, 0.01f);
+                ImGui.TreePop();
+            }
+            ImGui.TreePop();
+        }
+
         ImGui.End();
 
-        ImGui.Begin("Directional Light");
-        ImGuiExtensions.DragFloat3("Direction", ref _directionalLight.Direction, 0.01f);
-        ImGui.End();
-        
-        ImGui.Begin("Point Light");
-        ImGuiExtensions.DragFloat3("Position", ref _pointLight.Position, 0.01f);
-        ImGuiExtensions.ColorEdit3("Diffuse", ref _pointLight.Diffuse);
-        ImGuiExtensions.ColorEdit3("Specular", ref _pointLight.Specular);
-        ImGui.DragFloat("Constant", ref _pointLight.Constant, 0.01f);
-        ImGui.DragFloat("Linear", ref _pointLight.Linear, 0.01f);
-        ImGui.DragFloat("Quadratic", ref _pointLight.Quadratic, 0.01f);
-        ImGui.End();
-
-        ImGui.Begin("Spotlight");
-        ImGuiExtensions.DragFloat3("Position", ref _spotLight.Position, 0.01f);
-        ImGuiExtensions.DragFloat3("Direction", ref _spotLight.Direction, 0.01f);
-        ImGuiExtensions.ColorEdit3("Diffuse", ref _spotLight.Diffuse);
-        ImGuiExtensions.ColorEdit3("Specular", ref _spotLight.Specular);
-        ImGui.DragFloat("Constant", ref _spotLight.Constant, 0.01f);
-        ImGui.DragFloat("Linear", ref _spotLight.Linear, 0.01f);
-        ImGui.DragFloat("Quadratic", ref _spotLight.Quadratic, 0.01f);
-        ImGui.DragFloat("cutOff", ref _spotLight.CutOff, 0.01f);
-        ImGui.DragFloat("outerCutOff", ref _spotLight.OuterCutOff, 0.01f);
-        ImGui.End();
-
-        Title = $"FPS {ImGui.GetIO().Framerate}";
+        Title = $"Lys - FPS {ImGui.GetIO().Framerate}";
 
         _controller.Render();
     }
