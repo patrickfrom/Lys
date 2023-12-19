@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using ImGuiNET;
+using Lys.Lights;
 using Lys.Utils;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
@@ -78,30 +79,41 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     };
 
     private Shader _shader;
-    
+
     private int _vao;
     private int _vbo;
     private int _ebo;
-    
+
     private Shader _skyboxShader;
     private Skybox _skybox;
-    
+
     private int _skyboxVao;
     private int _skyboxVbo;
 
     private Camera _camera;
-    
+
     private Vector3 _cubePos;
     private float _cubeScale = 1.0f;
     private Vector3 _cubeRotation;
+    private float _cubeShininess = 8.0f;
+
     private int _uboMatrices;
-    private Texture2D _containerTexture;
+
+    private Texture2D _walnutDiffuse;
+    private Texture2D _walnutSpecular;
+
+    private DirectionalLight _directionalLight = new(
+        new Vector3(-0.090f, -0.340f, 0.320f),
+        new Vector3(1, 1, 1),
+        new Vector3(1, 1, 1),
+        new Vector3(1, 1, 1)
+    );
 
     protected override void OnLoad()
     {
         GlDebugger.Init();
         GL.ClearColor(Color.Navy);
-        
+
         _controller = new ImGuiController(ClientSize.X, ClientSize.Y);
 
         _vao = GL.GenVertexArray();
@@ -130,12 +142,12 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         _shader = new Shader("Assets/Shaders/default.vert", "Assets/Shaders/default.frag");
         _skyboxShader = new Shader("Assets/Shaders/skybox.vert", "Assets/Shaders/skybox.frag");
-        
+
         _camera = new Camera(Vector3.UnitZ * 3, ClientSize.X / (float)ClientSize.Y, KeyboardState,
             MouseState);
 
         CursorState = CursorState.Grabbed;
-        
+
         _skyboxVao = GL.GenVertexArray();
         GL.BindVertexArray(_skyboxVao);
 
@@ -145,10 +157,10 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
             BufferUsageHint.StaticDraw);
 
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
-        
+
         GL.EnableVertexAttribArray(0);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-        
+
         var skyboxPaths = new[]
         {
             "Assets/Skybox/Calm/px.png",
@@ -162,20 +174,23 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _skybox = new Skybox(skyboxPaths);
         _skyboxShader.SetInt("skybox", 0);
 
-        _containerTexture = new Texture2D("Assets/Textures/container2.png");
-        _shader.SetInt("diffuse", 0);
-        
+        _walnutDiffuse = new Texture2D("Assets/Textures/WalnutBaseTexture_albedo.png");
+        _walnutSpecular = new Texture2D("Assets/Textures/WalnutBaseTexture_specular.png");
+        _shader.SetInt("material.diffuse", 0);
+        _shader.SetInt("material.specular", 1);
+
         GL.Enable(EnableCap.DepthTest);
         GL.Enable(EnableCap.Multisample);
         GL.Enable(EnableCap.FramebufferSrgb);
-        
+
         GL.CullFace(CullFaceMode.Back);
-        
+
         _uboMatrices = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.UniformBuffer, _uboMatrices);
-        GL.BufferData(BufferTarget.UniformBuffer, 2 * Unsafe.SizeOf<Matrix4>(), IntPtr.Zero, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.UniformBuffer, 2 * Unsafe.SizeOf<Matrix4>(), IntPtr.Zero,
+            BufferUsageHint.StaticDraw);
         GL.BindBuffer(BufferTarget.UniformBuffer, 0);
-        
+
         GL.BindBufferRange(BufferRangeTarget.UniformBuffer, 0, _uboMatrices, 0, 2 * Unsafe.SizeOf<Matrix4>());
     }
 
@@ -185,13 +200,18 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         var view = Matrix4.Transpose(_camera.GetViewMatrix());
         var projection = Matrix4.Transpose(_camera.GetProjectionMatrix());
-        
+
         GL.BindBuffer(BufferTarget.UniformBuffer, _uboMatrices);
         GL.BufferSubData(BufferTarget.UniformBuffer, 0, Unsafe.SizeOf<Matrix4>(), ref projection);
         GL.BufferSubData(BufferTarget.UniformBuffer, Unsafe.SizeOf<Matrix4>(), Unsafe.SizeOf<Matrix4>(), ref view);
         GL.BindBuffer(BufferTarget.UniformBuffer, 0);
-        
-        //_shader.SetVector3("viewPos", _camera.Position);
+
+        _shader.SetVector3("viewPos", _camera.Position);
+
+        _shader.SetVector3("directionalLight.direction", _directionalLight.Direction);
+        _shader.SetVector3("directionalLight.ambient", _directionalLight.Ambient);
+        _shader.SetVector3("directionalLight.diffuse", _directionalLight.Diffuse);
+        _shader.SetVector3("directionalLight.specular", _directionalLight.Diffuse);
 
         GL.BindVertexArray(_vao);
 
@@ -201,14 +221,17 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         model *= Matrix4.CreateRotationY(MathHelper.DegreesToRadians(_cubeRotation.Y));
         model *= Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(_cubeRotation.Z));
         model *= Matrix4.CreateTranslation(_cubePos);
-        _containerTexture.Use();
+        _shader.SetFloat("material.shininess", _cubeShininess);
+        _walnutDiffuse.Use();
+        _walnutSpecular.Use(1);
+        _shader.SetMatrix4("model", model);
         _shader.SetMatrix4("model", model);
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
-        
+
         ShowSkybox();
 
         RenderUi((float)e.Time);
-        
+
         SwapBuffers();
     }
 
@@ -218,19 +241,19 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         {
             CursorState = CursorState == CursorState.Grabbed ? CursorState.Normal : CursorState.Grabbed;
         }
-        
+
         if (KeyboardState.IsKeyDown(Keys.Escape))
             Close();
-        
+
         if (KeyboardState.IsKeyPressed(Keys.F11))
         {
             WindowState = WindowState != WindowState.Fullscreen
                 ? WindowState.Fullscreen
                 : WindowState.Normal;
         }
-        
 
-        if(CursorState == CursorState.Grabbed)
+
+        if (CursorState == CursorState.Grabbed)
             _camera.Update(e.Time);
     }
 
@@ -263,15 +286,20 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         GL.DepthFunc(DepthFunction.Less);
         GL.Enable(EnableCap.CullFace);
     }
-    
+
     private void RenderUi(float time)
     {
         _controller.Update(this, time);
 
-        ImGui.Begin("Cube Pos");
+        ImGui.Begin("Cube");
         ImGuiExtensions.DragFloat3("Position", ref _cubePos, 0.01f);
         ImGuiExtensions.DragFloat3("Rotation", ref _cubeRotation, 0.1f);
         ImGui.DragFloat("Scale", ref _cubeScale, 0.01f);
+        ImGui.DragFloat("Shininess", ref _cubeShininess, 0.01f);
+        ImGui.End();
+
+        ImGui.Begin("Directional Light");
+        ImGuiExtensions.DragFloat3("Direction", ref _directionalLight.Direction, 0.01f);
         ImGui.End();
 
         Title = $"FPS {ImGui.GetIO().Framerate}";
@@ -282,7 +310,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     protected override void OnUnload()
     {
         base.OnUnload();
-        
+
         _shader.Dispose();
     }
 }
