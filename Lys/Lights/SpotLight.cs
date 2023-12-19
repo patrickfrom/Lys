@@ -9,7 +9,7 @@ public struct SpotLight(
     float linear = 0.09f,
     float quadratic = 0.032f,
     float cutOff = 12.5f,
-    float outerCutOff = 15.0f,
+    float outerCutOff = 17.5f,
     Vector3 ambient = default,
     Vector3 diffuse = default,
     Vector3 specular = default

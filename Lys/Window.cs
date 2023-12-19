@@ -92,8 +92,8 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
     private Camera _camera;
 
-    private Vector3 _cubePos;
-    private float _cubeScale = 1.0f;
+    private Vector3 _cubePos = new(0.0f, -4.0f, 0.0f);
+    private float _cubeScale = 5.0f;
     private Vector3 _cubeRotation;
     private float _cubeShininess = 8.0f;
 
@@ -108,7 +108,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     );
 
     private PointLight _pointLight = new(new Vector3(0, -1, 0), diffuse: new Vector3(1,0,0), ambient: new Vector3(0.5f));
-    private SpotLight _spotLight = new(new Vector3(0, 1, 0), new Vector3(0, -1, 0), diffuse: new Vector3(0,1,0), ambient: new Vector3(0.0f));
+    private SpotLight _spotLight = new(new Vector3(0, 1, 0), new Vector3(0, -1, 0), diffuse: new Vector3(0,1,0), specular: new Vector3(0,1,0), ambient: new Vector3(0.0f));
 
     protected override void OnLoad()
     {
