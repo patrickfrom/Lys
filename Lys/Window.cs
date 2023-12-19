@@ -79,6 +79,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     };
 
     private Shader _shader;
+    private Shader _lightCubeShader;
 
     private int _vao;
     private int _vbo;
@@ -142,6 +143,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
             Marshal.OffsetOf<Vertex>(nameof(Vertex.TexCoords)));
 
         _shader = new Shader("Assets/Shaders/default.vert", "Assets/Shaders/default.frag");
+        _lightCubeShader = new Shader("Assets/Shaders/default.vert", "Assets/Shaders/lightcube.frag");
         _skyboxShader = new Shader("Assets/Shaders/skybox.vert", "Assets/Shaders/skybox.frag");
 
         _camera = new Camera(Vector3.UnitZ * 3, ClientSize.X / (float)ClientSize.Y, KeyboardState,
@@ -224,6 +226,16 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _shader.SetVector3("pointLight.diffuse", _pointLight.Diffuse);
         _shader.SetVector3("pointLight.specular", _pointLight.Specular);     
         
+        GL.BindVertexArray(_vao);
+
+        var model = Matrix4.Identity;
+        model *= Matrix4.CreateScale(0.5f);
+        model *= Matrix4.CreateTranslation(_pointLight.Position);
+        
+        _lightCubeShader.SetVector3("lightColor", _pointLight.Diffuse);
+        _lightCubeShader.SetMatrix4("model", model);
+        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+        
         // Spot Light
         _shader.SetVector3("spotLight.position", _spotLight.Position);
         _shader.SetVector3("spotLight.direction", _spotLight.Direction);
@@ -235,10 +247,19 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _shader.SetVector3("spotLight.ambient", _spotLight.Ambient);
         _shader.SetVector3("spotLight.diffuse", _spotLight.Diffuse);
         _shader.SetVector3("spotLight.specular", _spotLight.Specular);
+        
+        GL.BindVertexArray(_vao);
+        model = Matrix4.Identity;
+        model *= Matrix4.CreateScale(0.5f);
+        model *= Matrix4.CreateTranslation(_spotLight.Position);
+        
+        _lightCubeShader.SetVector3("lightColor", _spotLight.Diffuse);
+        _lightCubeShader.SetMatrix4("model", model);
+        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
         GL.BindVertexArray(_vao);
 
-        var model = Matrix4.Identity;
+        model = Matrix4.Identity;
         model *= Matrix4.CreateScale(_cubeScale);
         model *= Matrix4.CreateRotationX(MathHelper.DegreesToRadians(_cubeRotation.X));
         model *= Matrix4.CreateRotationY(MathHelper.DegreesToRadians(_cubeRotation.Y));
@@ -324,11 +345,21 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         ImGui.Begin("Directional Light");
         ImGuiExtensions.DragFloat3("Direction", ref _directionalLight.Direction, 0.01f);
         ImGui.End();
+        
+        ImGui.Begin("Point Light");
+        ImGuiExtensions.DragFloat3("Position", ref _pointLight.Position, 0.01f);
+        ImGuiExtensions.ColorEdit3("Diffuse", ref _pointLight.Diffuse);
+        ImGuiExtensions.ColorEdit3("Specular", ref _pointLight.Specular);
+        ImGui.DragFloat("Constant", ref _pointLight.Constant, 0.01f);
+        ImGui.DragFloat("Linear", ref _pointLight.Linear, 0.01f);
+        ImGui.DragFloat("Quadratic", ref _pointLight.Quadratic, 0.01f);
+        ImGui.End();
 
         ImGui.Begin("Spotlight");
         ImGuiExtensions.DragFloat3("Position", ref _spotLight.Position, 0.01f);
         ImGuiExtensions.DragFloat3("Direction", ref _spotLight.Direction, 0.01f);
-        ImGuiExtensions.ColorEdit3("Color", ref _spotLight.Diffuse);
+        ImGuiExtensions.ColorEdit3("Diffuse", ref _spotLight.Diffuse);
+        ImGuiExtensions.ColorEdit3("Specular", ref _spotLight.Specular);
         ImGui.DragFloat("Constant", ref _spotLight.Constant, 0.01f);
         ImGui.DragFloat("Linear", ref _spotLight.Linear, 0.01f);
         ImGui.DragFloat("Quadratic", ref _spotLight.Quadratic, 0.01f);
