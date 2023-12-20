@@ -24,6 +24,9 @@
         <None Update="Assets\Shaders\default.vert">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <None Update="Assets\Shaders\depth.frag">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>

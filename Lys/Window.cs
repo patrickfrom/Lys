@@ -10,6 +10,7 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using Vector4 = System.Numerics.Vector4;
 
 namespace Lys;
 
@@ -100,6 +101,10 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
     private int _uboMatrices;
 
+    private Shader _depthShader;
+    private int _fboDepthMap;
+    private int _depthMap;
+
     private Texture2D _walnutDiffuse;
     private Texture2D _walnutSpecular;
 
@@ -113,6 +118,8 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
     private SpotLight _spotLight = new(new Vector3(0, 1, 0), new Vector3(0, -1, 0), diffuse: new Vector3(0, 1, 0),
         specular: new Vector3(0, 1, 0), ambient: new Vector3(0.0f));
+
+    private Matrix4 _lightProjection = Matrix4.CreateOrthographicOffCenter(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f);
 
     protected override void OnLoad()
     {
@@ -198,20 +205,67 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         GL.BindBuffer(BufferTarget.UniformBuffer, 0);
 
         GL.BindBufferRange(BufferRangeTarget.UniformBuffer, 0, _uboMatrices, 0, 2 * Unsafe.SizeOf<Matrix4>());
+
+        // Create Shadow Map
+        _depthShader = new Shader("Assets/Shaders/depth.vert", "Assets/Shaders/depth.frag");
+        _depthShader.SetInt("depthMap", 0);
+        _fboDepthMap = GL.GenFramebuffer();
+
+        const int shadowWidth = 1024;
+        const int shadowHeight = 1024;
+
+        _depthMap = GL.GenTexture();
+        GL.BindTexture(TextureTarget.Texture2D, _depthMap);
+        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent, shadowWidth, shadowHeight, 0,
+            PixelFormat.DepthComponent, PixelType.Float, 0);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, _fboDepthMap);
+        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment,
+            TextureTarget.Texture2D, _depthMap, 0);
+        GL.DrawBuffer(DrawBufferMode.None);
+        GL.ReadBuffer(ReadBufferMode.None);
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
     }
 
     protected override void OnRenderFrame(FrameEventArgs e)
     {
-        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
         var view = Matrix4.Transpose(_camera.GetViewMatrix());
         var projection = Matrix4.Transpose(_camera.GetProjectionMatrix());
+
+        var lightView = Matrix4.LookAt(_directionalLight.Direction, new Vector3(0, 0, 0), new Vector3(0, 1, 0));
+        var lightSpaceMatrix = _lightProjection * lightView;
+
+        // Currently at Rendering shadows
+        _depthShader.SetMatrix4("lightSpaceMatrix", lightSpaceMatrix);
 
         GL.BindBuffer(BufferTarget.UniformBuffer, _uboMatrices);
         GL.BufferSubData(BufferTarget.UniformBuffer, 0, Unsafe.SizeOf<Matrix4>(), ref projection);
         GL.BufferSubData(BufferTarget.UniformBuffer, Unsafe.SizeOf<Matrix4>(), Unsafe.SizeOf<Matrix4>(), ref view);
         GL.BindBuffer(BufferTarget.UniformBuffer, 0);
 
+        GL.Viewport(0, 0, 1024, 1024);
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, _fboDepthMap);
+        GL.Clear(ClearBufferMask.DepthBufferBit);
+        RenderScene();
+
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        GL.Viewport(0, 0, ClientSize.X, ClientSize.Y);
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        RenderScene();
+
+        ShowSkybox();
+
+        RenderUi((float)e.Time);
+
+        SwapBuffers();
+    }
+
+    private void RenderScene()
+    {
         _shader.SetVector3("viewPos", _camera.Position);
 
         // Directional Light
@@ -298,12 +352,6 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _shader.SetMatrix4("model", model);
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         GL.BindTexture(TextureTarget.Texture2D, 0);
-
-        ShowSkybox();
-
-        RenderUi((float)e.Time);
-
-        SwapBuffers();
     }
 
     protected override void OnUpdateFrame(FrameEventArgs e)
@@ -362,6 +410,8 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     {
         _controller.Update(this, time);
 
+        if (CursorState == CursorState.Grabbed)
+            return;
 
         ImGui.Begin("Editor");
         if (ImGui.TreeNode("Cubes"))
@@ -410,11 +460,11 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
                 ImGui.DragFloat("outerCutOff", ref _spotLight.OuterCutOff, 0.01f);
                 ImGui.TreePop();
             }
+
             ImGui.TreePop();
         }
 
         ImGui.End();
-
         Title = $"Lys - FPS {ImGui.GetIO().Framerate}";
 
         _controller.Render();

@@ -6,6 +6,8 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using OpenTK.Graphics.OpenGL4;
 using ErrorCode = OpenTK.Graphics.OpenGL4.ErrorCode;
+using Vector3 = System.Numerics.Vector3;
+using Vector4 = System.Numerics.Vector4;
 
 namespace Lys.Utils;
 
@@ -69,6 +71,11 @@ namespace Lys.Utils;
 
             ImGui.NewFrame();
             _frameBegun = true;
+        }
+
+        private static Vector3 RgbToNormalized(int r, int g, int b)
+        {
+            return new Vector3((float)r/255, (float)g/255, (float)b/255);
         }
 
         public void WindowResized(int width, int height)
