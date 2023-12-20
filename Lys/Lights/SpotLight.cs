@@ -8,6 +8,7 @@ public struct SpotLight(
     float constant = 1.0f,
     float linear = 0.09f,
     float quadratic = 0.032f,
+    float brightness = 1.0f,
     float cutOff = 12.5f,
     float outerCutOff = 17.5f,
     Vector3 ambient = default,
@@ -21,6 +22,7 @@ public struct SpotLight(
     public float Constant = constant;
     public float Linear = linear;
     public float Quadratic = quadratic;
+    public float Brightness = brightness;
 
     public float CutOff = cutOff;
     public float OuterCutOff = outerCutOff;

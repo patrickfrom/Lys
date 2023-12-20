@@ -270,6 +270,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         // Directional Light
         _shader.SetVector3("directionalLight.direction", _directionalLight.Direction);
+        _shader.SetFloat("directionalLight.brightness", _directionalLight.Brightness);
         _shader.SetVector3("directionalLight.ambient", _directionalLight.Ambient);
         _shader.SetVector3("directionalLight.diffuse", _directionalLight.Diffuse);
         _shader.SetVector3("directionalLight.specular", _directionalLight.Specular);
@@ -278,6 +279,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _shader.SetVector3("pointLight.position", _pointLight.Position);
         _shader.SetFloat("pointLight.constant", _pointLight.Constant);
         _shader.SetFloat("pointLight.linear", _pointLight.Linear);
+        _shader.SetFloat("pointLight.brightness", _pointLight.Brightness);
         _shader.SetFloat("pointLight.quadratic", _pointLight.Quadratic);
         _shader.SetVector3("pointLight.ambient", _pointLight.Ambient);
         _shader.SetVector3("pointLight.diffuse", _pointLight.Diffuse);
@@ -301,6 +303,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _shader.SetFloat("spotLight.constant", _spotLight.Constant);
         _shader.SetFloat("spotLight.linear", _spotLight.Linear);
         _shader.SetFloat("spotLight.quadratic", _spotLight.Quadratic);
+        _shader.SetFloat("spotLight.brightness", _spotLight.Brightness);
         _shader.SetVector3("spotLight.ambient", _spotLight.Ambient);
         _shader.SetVector3("spotLight.diffuse", _spotLight.Diffuse);
         _shader.SetVector3("spotLight.specular", _spotLight.Specular);
@@ -436,6 +439,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
             if (ImGui.TreeNode("Directional Light"))
             {
                 ImGuiExtensions.DragFloat3("Direction", ref _directionalLight.Direction, 0.01f);
+                ImGui.DragFloat("Brightness", ref _directionalLight.Brightness, 0.01f, 0.0f);
                 ImGui.TreePop();
             }
 
@@ -444,9 +448,10 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
                 ImGuiExtensions.DragFloat3("Position", ref _pointLight.Position, 0.01f);
                 ImGuiExtensions.ColorEdit3("Diffuse", ref _pointLight.Diffuse);
                 ImGuiExtensions.ColorEdit3("Specular", ref _pointLight.Specular);
-                ImGui.DragFloat("Constant", ref _pointLight.Constant, 0.01f);
-                ImGui.DragFloat("Linear", ref _pointLight.Linear, 0.01f);
-                ImGui.DragFloat("Quadratic", ref _pointLight.Quadratic, 0.01f);
+                ImGui.DragFloat("Brightness", ref _pointLight.Brightness, 0.01f, 0.0f);
+                ImGui.DragFloat("Constant", ref _pointLight.Constant, 0.01f, 0.0f, 6.0f);
+                ImGui.DragFloat("Linear", ref _pointLight.Linear, 0.01f, 0.0f, 6.0f);
+                ImGui.DragFloat("Quadratic", ref _pointLight.Quadratic, 0.01f, 0.0f, 6.0f);
                 ImGui.TreePop();
             }
 
@@ -456,11 +461,12 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
                 ImGuiExtensions.DragFloat3("Direction", ref _spotLight.Direction, 0.01f);
                 ImGuiExtensions.ColorEdit3("Diffuse", ref _spotLight.Diffuse);
                 ImGuiExtensions.ColorEdit3("Specular", ref _spotLight.Specular);
-                ImGui.DragFloat("Constant", ref _spotLight.Constant, 0.01f);
-                ImGui.DragFloat("Linear", ref _spotLight.Linear, 0.01f);
-                ImGui.DragFloat("Quadratic", ref _spotLight.Quadratic, 0.01f);
-                ImGui.DragFloat("cutOff", ref _spotLight.CutOff, 0.01f);
-                ImGui.DragFloat("outerCutOff", ref _spotLight.OuterCutOff, 0.01f);
+                ImGui.DragFloat("Constant", ref _spotLight.Constant, 0.01f, 0.0f, 0.6f);
+                ImGui.DragFloat("Linear", ref _spotLight.Linear, 0.01f, 0.0f, 0.6f);
+                ImGui.DragFloat("Quadratic", ref _spotLight.Quadratic, 0.01f, 0.0f, 6.0f);
+                ImGui.DragFloat("Brightness", ref _spotLight.Brightness, 0.01f, 0.0f, 200.0f);
+                ImGui.DragFloat("cutOff", ref _spotLight.CutOff, 0.01f, 0.0f, 6.0f);
+                ImGui.DragFloat("outerCutOff", ref _spotLight.OuterCutOff, 0.01f, 0.0f, 6.0f);
                 ImGui.TreePop();
             }
 
