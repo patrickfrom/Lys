@@ -208,7 +208,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         // Create Shadow Map
         _depthShader = new Shader("Assets/Shaders/depth.vert", "Assets/Shaders/depth.frag");
-        _depthShader.SetInt("depthMap", 0);
+        //_depthShader.SetInt("depthMap", 0);
         _fboDepthMap = GL.GenFramebuffer();
 
         const int shadowWidth = 1024;
@@ -296,11 +296,11 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         // Spot Light
         _shader.SetVector3("spotLight.position", _spotLight.Position);
         _shader.SetVector3("spotLight.direction", _spotLight.Direction);
+        _shader.SetFloat("spotLight.cutOff", MathF.Cos(MathHelper.DegreesToRadians(_spotLight.CutOff)));
+        _shader.SetFloat("spotLight.outerCutOff", MathF.Cos(MathHelper.DegreesToRadians(_spotLight.OuterCutOff)));
         _shader.SetFloat("spotLight.constant", _spotLight.Constant);
         _shader.SetFloat("spotLight.linear", _spotLight.Linear);
         _shader.SetFloat("spotLight.quadratic", _spotLight.Quadratic);
-        _shader.SetFloat("spotLight.cutOff", (float)Math.Cos(MathHelper.DegreesToRadians(_spotLight.CutOff)));
-        _shader.SetFloat("spotLight.outerCutOff", (float)Math.Cos(MathHelper.DegreesToRadians(_spotLight.OuterCutOff)));
         _shader.SetVector3("spotLight.ambient", _spotLight.Ambient);
         _shader.SetVector3("spotLight.diffuse", _spotLight.Diffuse);
         _shader.SetVector3("spotLight.specular", _spotLight.Specular);
@@ -326,6 +326,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _walnutDiffuse.Use();
         _walnutSpecular.Use(1);
         _shader.SetMatrix4("model", model);
+        _shader.SetMatrix3("normalInverse", new Matrix3(model.Inverted()));
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         GL.BindTexture(TextureTarget.Texture2D, 0);
 
@@ -338,6 +339,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _walnutDiffuse.Use();
         _walnutSpecular.Use(1);
         _shader.SetMatrix4("model", model);
+        _shader.SetMatrix3("normalInverse", new Matrix3(model.Inverted()));
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         GL.BindTexture(TextureTarget.Texture2D, 0);
 
@@ -350,6 +352,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _walnutDiffuse.Use();
         _walnutSpecular.Use(1);
         _shader.SetMatrix4("model", model);
+        _shader.SetMatrix3("normalInverse", new Matrix3(model.Inverted()));
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         GL.BindTexture(TextureTarget.Texture2D, 0);
     }
