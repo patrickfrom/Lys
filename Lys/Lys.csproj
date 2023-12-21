@@ -10,6 +10,7 @@
 
     <ItemGroup>
         <PackageReference Include="AssimpNet" Version="4.1.0" />
+        <PackageReference Include="ImGui.NET" Version="1.90.0.1" />
         <PackageReference Include="OpenTK.Audio.OpenAL" Version="4.8.2" />
         <PackageReference Include="OpenTK.Graphics" Version="4.8.2"/>
         <PackageReference Include="OpenTK.Windowing.Desktop" Version="4.8.2"/>
@@ -20,12 +21,15 @@
         <None Update="Assets\**\*">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="Assets\Audio\call_to_arms.wav">
+        <None Update="Assets\Shaders\default.vert">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Shaders\depth.frag">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Assets\Textures\"/>
+      <Folder Include="Assets\Skybox\" />
     </ItemGroup>
 </Project>

@@ -1,13 +1,15 @@
 ﻿#version 440
 layout (location = 0) in vec3 aPosition;
 
-out vec3 texCoords;
+layout (std140, binding = 0) uniform Matrices {
+    mat4 projection;
+    mat4 view;
+};
 
-uniform mat4 projection;
-uniform mat4 view;
+out vec3 TexCoords;
 
 void main() {
-    texCoords = aPosition;
-    vec4 pos =  vec4(aPosition, 1.0) * view * projection;
+    TexCoords = aPosition;
+    vec4 pos =  vec4(aPosition, 1.0) * mat4(mat3(view)) * projection;
     gl_Position = pos.xyww;
 }
