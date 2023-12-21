@@ -2,17 +2,18 @@
 
 namespace Lys.Renderer;
 
-public class VertexBuffer
+public class VertexBuffer<T> where T : struct
 {
     private readonly int _rendererId;
-    
-    public VertexBuffer(float[] vertices, int size)
+    private BufferLayout _layout;
+        
+    public VertexBuffer(IEnumerable<T> vertices, int size)
     {
         _rendererId = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, _rendererId);
-        GL.BufferData(BufferTarget.ArrayBuffer, size, vertices, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ArrayBuffer, size, vertices.ToArray(), BufferUsageHint.StaticDraw);
     }
-    
+
     public void Bind()
     {
         GL.BindBuffer(BufferTarget.ArrayBuffer, _rendererId);
@@ -21,5 +22,15 @@ public class VertexBuffer
     public void Unbind()
     {
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+    }
+
+    public BufferLayout GetLayout()
+    {
+        return _layout;
+    }
+
+    public void SetLayout(BufferLayout layout)
+    {
+        _layout = layout;
     }
 }

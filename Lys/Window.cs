@@ -82,15 +82,14 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     private Shader _lightCubeShader;
 
     private VertexArray _vao;
-    //private int _vbo;
-    private VertexBuffer _vbo;
-    private int _ebo;
+    private VertexBuffer<float> _vbo;
+    private IndexBuffer _ebo;
 
     private Shader _skyboxShader;
     private Skybox _skybox;
 
     private VertexArray _skyboxVao;
-    private VertexBuffer _skyboxVbo;
+    private VertexBuffer<float> _skyboxVbo;
 
     private Camera _camera;
 
@@ -130,13 +129,6 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         _vao = new VertexArray();
         _vao.Bind();
-
-        _vbo = new VertexBuffer(_vertices, _vertices.Length * sizeof(float));
-
-        _ebo = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
-        GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(int), _indices,
-            BufferUsageHint.StaticDraw);
         
         var layout = new BufferLayout(new[]
         {
@@ -144,16 +136,26 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
             new BufferElement(ShaderDataType.Float3, "Normals"),
             new BufferElement(ShaderDataType.Float2, "TexCoords"),
         });
-
-        // Later add this to VertexArray
-        var index = 0;
-        foreach (var element in layout.GetElements())
+        
+        _vbo = new VertexBuffer<float>(_vertices, _vertices.Length * sizeof(float));
+        _vbo.SetLayout(layout);
+        _vao.AddVertexBuffer(ref _vbo);
+        
+        _ebo = new IndexBuffer(_indices, _indices.Length * sizeof(int));
+        
+        _skyboxVao = new VertexArray();
+        _skyboxVao.Bind();
+        
+        layout = new BufferLayout(new[]
         {
-            GL.EnableVertexAttribArray(index);
-            GL.VertexAttribPointer(index, element.GetComponentCount(), VertexArray.ShaderDataTypeToOpenGl(element.Type), element.Normalized, layout.GetStride(), element.Offset);
-            Console.WriteLine(element.Offset);
-            index++;
-        }
+            new BufferElement(ShaderDataType.Float3, "Position")
+        });
+        
+        _skyboxVbo = new VertexBuffer<float>(Skybox.SkyboxVertices, Skybox.SkyboxVertices.Length * sizeof(float));
+        _skyboxVbo.SetLayout(layout);
+        _skyboxVao.AddVertexBuffer(ref _skyboxVbo);
+        
+        _ebo.Bind();
 
         _shader = new Shader("Assets/Shaders/default.vert", "Assets/Shaders/default.frag");
         _lightCubeShader = new Shader("Assets/Shaders/default.vert", "Assets/Shaders/lightcube.frag");
@@ -163,27 +165,6 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
             MouseState);
 
         CursorState = CursorState.Grabbed;
-
-        _skyboxVao = new VertexArray();
-        _skyboxVao.Bind();
-
-        _skyboxVbo = new VertexBuffer(Skybox.SkyboxVertices, Skybox.SkyboxVertices.Length * sizeof(float));
-        
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
-
-        layout = new BufferLayout(new[]
-        {
-            new BufferElement(ShaderDataType.Float3, "Position")
-        });
-        
-        index = 0;
-        foreach (var element in layout.GetElements())
-        {
-            GL.EnableVertexAttribArray(index);
-            GL.VertexAttribPointer(index, element.GetComponentCount(), VertexArray.ShaderDataTypeToOpenGl(element.Type), element.Normalized, layout.GetStride(), element.Offset);
-            Console.WriteLine(element.Offset);
-            index++;
-        }
 
         var skyboxPaths = new[]
         {
