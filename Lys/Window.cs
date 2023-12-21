@@ -130,15 +130,15 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _vao = new VertexArray();
         _vao.Bind();
         
-        var layout = new BufferLayout(new[]
+        _vbo = new VertexBuffer<float>(_vertices, _vertices.Length * sizeof(float));
+        
+        _vbo.SetLayout(new BufferLayout(new[]
         {
             new BufferElement(ShaderDataType.Float3, "Position"),
             new BufferElement(ShaderDataType.Float3, "Normals"),
             new BufferElement(ShaderDataType.Float2, "TexCoords"),
-        });
+        }));
         
-        _vbo = new VertexBuffer<float>(_vertices, _vertices.Length * sizeof(float));
-        _vbo.SetLayout(layout);
         _vao.AddVertexBuffer(ref _vbo);
         
         _ebo = new IndexBuffer(_indices, _indices.Length * sizeof(int));
@@ -146,13 +146,13 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _skyboxVao = new VertexArray();
         _skyboxVao.Bind();
         
-        layout = new BufferLayout(new[]
+        _skyboxVbo = new VertexBuffer<float>(Skybox.SkyboxVertices, Skybox.SkyboxVertices.Length * sizeof(float));
+        
+        _skyboxVbo.SetLayout(new BufferLayout(new[]
         {
             new BufferElement(ShaderDataType.Float3, "Position")
-        });
+        }));
         
-        _skyboxVbo = new VertexBuffer<float>(Skybox.SkyboxVertices, Skybox.SkyboxVertices.Length * sizeof(float));
-        _skyboxVbo.SetLayout(layout);
         _skyboxVao.AddVertexBuffer(ref _skyboxVbo);
         
         _ebo.Bind();

@@ -28,7 +28,6 @@ public class VertexArray
         {
             GL.EnableVertexAttribArray(index);
             GL.VertexAttribPointer(index, element.GetComponentCount(), ShaderDataTypeToOpenGl(element.Type), element.Normalized, layout.GetStride(), element.Offset);
-            Console.WriteLine(element.Offset);
             index++;
         }
     }
