@@ -1,7 +1,7 @@
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace Lys;
+namespace Lys.Renderer;
 
 public class Shader
 {
@@ -79,5 +79,17 @@ public class Shader
     public void Dispose()
     {
         GL.DeleteProgram(_handle);
+    }
+    
+    public static int ShaderDataTypeSize(ShaderDataType type)
+    {
+        return type switch
+        {
+            ShaderDataType.Float => 4,
+            ShaderDataType.Float2 => 4 * 2,
+            ShaderDataType.Float3 => 4 * 3,
+            ShaderDataType.Float4 => 4 * 4,
+            _ => 0
+        };
     }
 }

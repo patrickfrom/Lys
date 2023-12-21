@@ -1,16 +1,15 @@
 using System.Drawing;
-using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using ImGuiNET;
 using Lys.Lights;
+using Lys.Renderer;
 using Lys.Utils;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
-using Vector4 = System.Numerics.Vector4;
 
 namespace Lys;
 
@@ -25,37 +24,37 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 {
     private ImGuiController _controller;
 
-    private readonly Vertex[] _vertices =
+    private readonly float[] _vertices =
     {
-        new(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(0.0f, 0.0f, -1.0f), new Vector2(0.0f, 0.0f)),
-        new(new Vector3(0.5f, -0.5f, -0.5f), new Vector3(0.0f, 0.0f, -1.0f), new Vector2(1.0f, 0.0f)),
-        new(new Vector3(0.5f, 0.5f, -0.5f), new Vector3(0.0f, 0.0f, -1.0f), new Vector2(1.0f, 1.0f)),
-        new(new Vector3(-0.5f, 0.5f, -0.5f), new Vector3(0.0f, 0.0f, -1.0f), new Vector2(0.0f, 1.0f)),
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
+        -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
 
-        new(new Vector3(-0.5f, -0.5f, 0.5f), new Vector3(0.0f, 0.0f, 1.0f), new Vector2(0.0f, 0.0f)),
-        new(new Vector3(0.5f, -0.5f, 0.5f), new Vector3(0.0f, 0.0f, 1.0f), new Vector2(1.0f, 0.0f)),
-        new(new Vector3(0.5f, 0.5f, 0.5f), new Vector3(0.0f, 0.0f, 1.0f), new Vector2(1.0f, 1.0f)),
-        new(new Vector3(-0.5f, 0.5f, 0.5f), new Vector3(0.0f, 0.0f, 1.0f), new Vector2(0.0f, 1.0f)),
+        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
 
-        new(new Vector3(-0.5f, 0.5f, -0.5f), new Vector3(-1.0f, 0.0f, 0.0f), new Vector2(0.0f, 0.0f)),
-        new(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(-1.0f, 0.0f, 0.0f), new Vector2(1.0f, 0.0f)),
-        new(new Vector3(-0.5f, -0.5f, 0.5f), new Vector3(-1.0f, 0.0f, 0.0f), new Vector2(1.0f, 1.0f)),
-        new(new Vector3(-0.5f, 0.5f, 0.5f), new Vector3(-1.0f, 0.0f, 0.0f), new Vector2(0.0f, 1.0f)),
+        -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
 
-        new(new Vector3(0.5f, 0.5f, 0.5f), new Vector3(1.0f, 0.0f, 0.0f), new Vector2(0.0f, 0.0f)),
-        new(new Vector3(0.5f, 0.5f, -0.5f), new Vector3(1.0f, 0.0f, 0.0f), new Vector2(1.0f, 0.0f)),
-        new(new Vector3(0.5f, -0.5f, -0.5f), new Vector3(1.0f, 0.0f, 0.0f), new Vector2(1.0f, 1.0f)),
-        new(new Vector3(0.5f, -0.5f, 0.5f), new Vector3(1.0f, 0.0f, 0.0f), new Vector2(0.0f, 1.0f)),
+        0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
 
-        new(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(0.0f, -1.0f, 0.0f), new Vector2(0.0f, 0.0f)),
-        new(new Vector3(0.5f, -0.5f, -0.5f), new Vector3(0.0f, -1.0f, 0.0f), new Vector2(1.0f, 0.0f)),
-        new(new Vector3(0.5f, -0.5f, 0.5f), new Vector3(0.0f, -1.0f, 0.0f), new Vector2(1.0f, 1.0f)),
-        new(new Vector3(-0.5f, -0.5f, 0.5f), new Vector3(0.0f, -1.0f, 0.0f), new Vector2(0.0f, 1.0f)),
+        -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
 
-        new(new Vector3(0.5f, 0.5f, -0.5f), new Vector3(0.0f, 1.0f, 0.0f), new Vector2(0.0f, 0.0f)),
-        new(new Vector3(0.5f, 0.5f, 0.5f), new Vector3(0.0f, 1.0f, 0.0f), new Vector2(1.0f, 0.0f)),
-        new(new Vector3(-0.5f, 0.5f, 0.5f), new Vector3(0.0f, 1.0f, 0.0f), new Vector2(1.0f, 1.0f)),
-        new(new Vector3(-0.5f, 0.5f, -0.5f), new Vector3(0.0f, 1.0f, 0.0f), new Vector2(0.0f, 1.0f)),
+        0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
     };
 
     private readonly int[] _indices =
@@ -82,15 +81,16 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
     private Shader _shader;
     private Shader _lightCubeShader;
 
-    private int _vao;
-    private int _vbo;
+    private VertexArray _vao;
+    //private int _vbo;
+    private VertexBuffer _vbo;
     private int _ebo;
 
     private Shader _skyboxShader;
     private Skybox _skybox;
 
-    private int _skyboxVao;
-    private int _skyboxVbo;
+    private VertexArray _skyboxVao;
+    private VertexBuffer _skyboxVbo;
 
     private Camera _camera;
 
@@ -120,7 +120,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         specular: new Vector3(0, 1, 0), ambient: new Vector3(0.0f));
 
     private Matrix4 _lightProjection = Matrix4.CreateOrthographicOffCenter(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f);
-
+    
     protected override void OnLoad()
     {
         GlDebugger.Init();
@@ -128,29 +128,32 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         _controller = new ImGuiController(ClientSize.X, ClientSize.Y);
 
-        _vao = GL.GenVertexArray();
-        GL.BindVertexArray(_vao);
+        _vao = new VertexArray();
+        _vao.Bind();
 
-        _vbo = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-        GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * Unsafe.SizeOf<Vertex>(), _vertices,
-            BufferUsageHint.StaticDraw);
+        _vbo = new VertexBuffer(_vertices, _vertices.Length * sizeof(float));
 
         _ebo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
         GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(int), _indices,
             BufferUsageHint.StaticDraw);
+        
+        var layout = new BufferLayout(new[]
+        {
+            new BufferElement(ShaderDataType.Float3, "Position"),
+            new BufferElement(ShaderDataType.Float3, "Normals"),
+            new BufferElement(ShaderDataType.Float2, "TexCoords"),
+        });
 
-        GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), IntPtr.Zero);
-
-        GL.EnableVertexAttribArray(1);
-        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(),
-            Marshal.OffsetOf<Vertex>(nameof(Vertex.Normal)));
-
-        GL.EnableVertexAttribArray(2);
-        GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(),
-            Marshal.OffsetOf<Vertex>(nameof(Vertex.TexCoords)));
+        // Later add this to VertexArray
+        var index = 0;
+        foreach (var element in layout.GetElements())
+        {
+            GL.EnableVertexAttribArray(index);
+            GL.VertexAttribPointer(index, element.GetComponentCount(), VertexArray.ShaderDataTypeToOpenGl(element.Type), element.Normalized, layout.GetStride(), element.Offset);
+            Console.WriteLine(element.Offset);
+            index++;
+        }
 
         _shader = new Shader("Assets/Shaders/default.vert", "Assets/Shaders/default.frag");
         _lightCubeShader = new Shader("Assets/Shaders/default.vert", "Assets/Shaders/lightcube.frag");
@@ -161,18 +164,26 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         CursorState = CursorState.Grabbed;
 
-        _skyboxVao = GL.GenVertexArray();
-        GL.BindVertexArray(_skyboxVao);
+        _skyboxVao = new VertexArray();
+        _skyboxVao.Bind();
 
-        _skyboxVbo = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ArrayBuffer, _skyboxVbo);
-        GL.BufferData(BufferTarget.ArrayBuffer, Skybox.SkyboxVertices.Length * sizeof(float), Skybox.SkyboxVertices,
-            BufferUsageHint.StaticDraw);
-
+        _skyboxVbo = new VertexBuffer(Skybox.SkyboxVertices, Skybox.SkyboxVertices.Length * sizeof(float));
+        
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
 
-        GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+        layout = new BufferLayout(new[]
+        {
+            new BufferElement(ShaderDataType.Float3, "Position")
+        });
+        
+        index = 0;
+        foreach (var element in layout.GetElements())
+        {
+            GL.EnableVertexAttribArray(index);
+            GL.VertexAttribPointer(index, element.GetComponentCount(), VertexArray.ShaderDataTypeToOpenGl(element.Type), element.Normalized, layout.GetStride(), element.Offset);
+            Console.WriteLine(element.Offset);
+            index++;
+        }
 
         var skyboxPaths = new[]
         {
@@ -194,7 +205,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
 
         GL.Enable(EnableCap.DepthTest);
         GL.Enable(EnableCap.Multisample);
-        GL.Enable(EnableCap.FramebufferSrgb);
+        //GL.Enable(EnableCap.FramebufferSrgb);
 
         GL.CullFace(CullFaceMode.Back);
 
@@ -285,7 +296,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _shader.SetVector3("pointLight.diffuse", _pointLight.Diffuse);
         _shader.SetVector3("pointLight.specular", _pointLight.Specular);
 
-        GL.BindVertexArray(_vao);
+        _vao.Bind();
 
         var model = Matrix4.Identity;
         model *= Matrix4.CreateScale(0.5f);
@@ -308,7 +319,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _shader.SetVector3("spotLight.diffuse", _spotLight.Diffuse);
         _shader.SetVector3("spotLight.specular", _spotLight.Specular);
 
-        GL.BindVertexArray(_vao);
+        _vao.Bind();
         model = Matrix4.Identity;
         model *= Matrix4.CreateScale(0.5f);
         model *= Matrix4.CreateTranslation(_spotLight.Position);
@@ -317,7 +328,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         _lightCubeShader.SetMatrix4("model", model);
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
-        GL.BindVertexArray(_vao);
+        _vao.Bind();
 
         model = Matrix4.Identity;
         model *= Matrix4.CreateScale(_cubeScale);
@@ -333,7 +344,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         GL.BindTexture(TextureTarget.Texture2D, 0);
 
-        GL.BindVertexArray(_vao);
+        _vao.Bind();
 
         model = Matrix4.Identity;
         model *= Matrix4.CreateScale(1.0f);
@@ -346,7 +357,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         GL.BindTexture(TextureTarget.Texture2D, 0);
 
-        GL.BindVertexArray(_vao);
+        _vao.Bind();
 
         model = Matrix4.Identity;
         model *= Matrix4.CreateScale(0.25f);
@@ -405,7 +416,7 @@ public class Window(int width, int height, string title) : GameWindow(GameWindow
         GL.Disable(EnableCap.CullFace);
         GL.DepthFunc(DepthFunction.Lequal);
         _skyboxShader.Use();
-        GL.BindVertexArray(_skyboxVao);
+        _skyboxVao.Bind();
         _skybox.Use();
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         GL.DepthFunc(DepthFunction.Less);

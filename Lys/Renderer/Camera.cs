@@ -1,7 +1,7 @@
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
-namespace Lys;
+namespace Lys.Renderer;
 
     public class Camera(Vector3 position, float aspectRatio, KeyboardState keyboardState, MouseState mouseState)
     {

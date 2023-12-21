@@ -1,7 +1,7 @@
-﻿﻿using OpenTK.Graphics.OpenGL4;
+﻿using OpenTK.Graphics.OpenGL4;
 using StbImageSharp;
 
-namespace Lys;
+namespace Lys.Renderer;
 
 public class Skybox
 {
